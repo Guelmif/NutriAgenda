@@ -1,0 +1,19 @@
+{% extends 'agenda/base.html' %}
+{% block title %}Entrar · NutriAgenda{% endblock %}
+{% block content %}
+<main id="conteudo" class="login-main">
+  <section class="login-card">
+    <p class="eyebrow">BEM-VINDO AO NUTRIAGENDA</p>
+    <h1>Sua rotina começa aqui<span class="heading-dot">.</span></h1>
+    <p class="subtitle">Entre para acompanhar seus agendamentos.</p>
+    <form method="post" class="login-form">
+      {% csrf_token %}
+      {% if form.errors %}<p role="alert" class="error-message">Não foi possível entrar. Confira seu usuário e senha.</p>{% endif %}
+      <label for="id_username">Usuário</label><input id="id_username" name="username" type="text" autocomplete="username" maxlength="150" required autofocus value="{{ form.username.value|default:'' }}">
+      <label for="id_password">Senha</label><input id="id_password" name="password" type="password" autocomplete="current-password" required>
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button class="primary-button" type="submit">Entrar na agenda <span aria-hidden="true">→</span></button>
+    </form>
+  </section>
+</main>
+{% endblock %}
