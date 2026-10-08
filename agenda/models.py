@@ -28,6 +28,9 @@ class FormularioAgendamento(models.Model):
     titulo = models.CharField('título', max_length=150, default='Agendamento nutricional')
     descricao = models.TextField('mensagem de apresentação', max_length=2000, blank=True)
     ativo = models.BooleanField('disponível para pacientes', default=True)
+    campos_padrao = models.JSONField(default=dict, blank=True)
+    perguntas = models.JSONField(default=list, blank=True)
+    versao = models.PositiveIntegerField(default=1)
 
     class Meta:
         ordering = ['-pk']
@@ -36,6 +39,24 @@ class FormularioAgendamento(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
+class ModeloFormulario(models.Model):
+    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='modelos_formulario')
+    nome = models.CharField('nome do modelo', max_length=150)
+    titulo = models.CharField('título do formulário', max_length=150)
+    descricao = models.TextField('mensagem de apresentação', max_length=2000, blank=True)
+    campos_padrao = models.JSONField(default=dict, blank=True)
+    perguntas = models.JSONField(default=list, blank=True)
+    versao = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ['nome', 'pk']
+        verbose_name = 'modelo de formulário'
+        verbose_name_plural = 'modelos de formulário'
+
+    def __str__(self):
+        return self.nome
 
 
 class DisponibilidadeQuerySet(models.QuerySet):
@@ -150,15 +171,17 @@ class Agendamento(models.Model):
 
 class FichaPaciente(models.Model):
     agendamento = models.OneToOneField(Agendamento, on_delete=models.CASCADE, related_name='ficha')
-    idade = models.PositiveSmallIntegerField('idade', validators=[MaxValueValidator(120)])
+    idade = models.PositiveSmallIntegerField('idade', validators=[MaxValueValidator(120)], null=True, blank=True)
     contato = models.CharField('contato', max_length=120)
-    tem_problemas_saude = models.BooleanField('tem problemas de saúde')
+    tem_problemas_saude = models.BooleanField('tem problemas de saúde', null=True, blank=True)
     problemas_saude = models.TextField('quais problemas de saúde', max_length=2000, blank=True)
-    usa_medicacoes = models.BooleanField('usa medicações')
+    usa_medicacoes = models.BooleanField('usa medicações', null=True, blank=True)
     medicacoes = models.TextField('quais medicações', max_length=2000, blank=True)
     ultimos_exames = models.CharField('última vez que fez exames', max_length=200, blank=True)
-    motivo_consulta = models.TextField('motivo da consulta', max_length=2000)
+    motivo_consulta = models.TextField('motivo da consulta', max_length=2000, blank=True)
     observacoes = models.TextField('observações', max_length=2000, blank=True)
+
+    respostas = models.JSONField('perguntas e respostas recebidas', default=list, blank=True)
 
     class Meta:
         verbose_name = 'ficha do paciente'

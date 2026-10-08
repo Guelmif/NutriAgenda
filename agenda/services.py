@@ -1,13 +1,20 @@
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
-from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente
+from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente, FormularioAgendamento
 
 
 @transaction.atomic
 def reservar_consulta(form):
     # The constraint on active appointments is the final guard against duplicate
     # submissions; select_for_update also serializes reservations on PostgreSQL.
+    # Lock the questionnaire before the slot so edits cannot race with booking.
+    locked_form = FormularioAgendamento.objects.filter(
+        pk=form.formulario.pk, ativo=True, versao=form.versao_schema,
+        campos_padrao=form.schema_recebido[0], perguntas=form.schema_recebido[1],
+    ).update(versao=models.F('versao'))
+    if not locked_form:
+        raise ValidationError('As perguntas ou a disponibilidade mudaram. Confira o formulário novamente.')
     selected = form.cleaned_data['slot']
     # Acquire the write lock before reading occupancy. SQLite ignores row locks,
     # so this atomic no-op update also serializes its concurrent writers.
@@ -35,5 +42,5 @@ def reservar_consulta(form):
         cliente=cliente, profissional=slot.profissional, disponibilidade=slot,
         data=slot.data, horario=slot.horario, status=Agendamento.Status.PENDENTE,
     )
-    FichaPaciente.objects.create(agendamento=consulta, **form.dados_ficha())
+    FichaPaciente.objects.create(agendamento=consulta, respostas=form.respostas_recebidas(), **form.dados_ficha())
     return consulta

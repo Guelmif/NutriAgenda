@@ -1,0 +1,28 @@
+{% extends 'agenda/base.html' %}
+{% load static %}
+{% block title %}Editar perguntas · NutriAgenda{% endblock %}
+{% block scripts %}<script src="{% static 'agenda/perguntas.js' %}" defer></script>{% endblock %}
+{% block content %}
+<main id="conteudo" class="main-content">
+  <a class="back-link" href="{% if modelo %}{% url 'agenda:formularios' %}{% else %}{% url 'agenda:editar_formulario' item.token %}{% endif %}">← {% if modelo %}Meus formulários{% else %}Configurar formulário{% endif %}</a>
+  <p class="eyebrow">{% if modelo %}MODELO REUTILIZÁVEL{% else %}FORMULÁRIO PERSONALIZADO{% endif %}</p>
+  <h1>Editar perguntas<span class="heading-dot">.</span></h1>
+  <p class="subtitle">{% if modelo %}{{ item.nome }} · As alterações serão usadas nos próximos formulários criados com este modelo.{% else %}{{ item.titulo }} · As respostas já recebidas mantêm as perguntas originais.{% endif %}</p>
+  <form method="post" id="question-editor" class="editor-form question-editor">
+    {% csrf_token %}<input type="hidden" name="versao" value="{{ item.versao }}">
+    {% if meta_form %}<section class="panel"><h2>Dados do modelo</h2>{% include 'agenda/campos.html' with form=meta_form %}</section>{% endif %}
+    <section class="panel"><p class="eyebrow">01 · CAMPOS BÁSICOS</p><h2>Perguntas do agendamento</h2><p class="section-description">Edite os textos, as instruções e quais perguntas são obrigatórias. Nutricionista, data, horário, nome e contato são essenciais e permanecem obrigatórios.</p>
+      {{ base_formset.management_form }}{% if base_formset.non_form_errors %}<div class="error-message" role="alert">{{ base_formset.non_form_errors }}</div>{% endif %}
+      <div class="base-question-list">{% for campo in base_formset %}<details class="base-question" {% if campo.errors %}open{% endif %}><summary>{{ campo.rotulo.value }}{% if campo.chave.value == 'profissional' or campo.chave.value == 'data' or campo.chave.value == 'horario' or campo.chave.value == 'nome' or campo.chave.value == 'contato' %} <span class="small-badge">Essencial</span>{% endif %}</summary><div class="form-grid">{{ campo.chave }}{% include 'agenda/campo.html' with field=campo.rotulo %}{% include 'agenda/campo.html' with field=campo.ajuda %}{% if campo.chave.value != 'profissional' and campo.chave.value != 'data' and campo.chave.value != 'horario' and campo.chave.value != 'nome' and campo.chave.value != 'contato' %}{% include 'agenda/campo.html' with field=campo.obrigatoria %}{% include 'agenda/campo.html' with field=campo.ativa %}{% endif %}{{ campo.non_field_errors }}</div></details>{% endfor %}</div>
+    </section>
+    <section class="panel"><p class="eyebrow">02 · PERGUNTAS ADICIONAIS</p><h2>Personalize o atendimento</h2><p class="section-description">Adicione até 50 perguntas. Use a ordem para definir como aparecem para o paciente; marque “Remover” para excluir uma pergunta deste formulário.</p>
+      {{ perguntas_formset.management_form }}{% if perguntas_formset.non_form_errors %}<div class="error-message" role="alert">{{ perguntas_formset.non_form_errors }}</div>{% endif %}
+      <div id="question-list">{% for pergunta in perguntas_formset %}{% include 'agenda/pergunta_editor.html' %}{% endfor %}</div>
+      <p class="field-help" id="questions-feedback" aria-live="polite"></p><button class="today-button" type="button" id="add-question">+ Adicionar pergunta</button>
+      <template id="empty-question">{% include 'agenda/pergunta_editor.html' with pergunta=perguntas_formset.empty_form %}</template>
+      <noscript><p class="field-help">Ative o JavaScript para adicionar novas perguntas.</p></noscript>
+    </section>
+    <div class="editor-footer"><p class="field-help">As alterações entram em vigor depois de salvar.</p><button class="primary-button" type="submit">Salvar perguntas</button></div>
+  </form>
+</main>
+{% endblock %}

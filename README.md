@@ -7,6 +7,9 @@ Sistema de agendamento nutricional com **Python e Django**. A agenda mensal est�
 - Calendário mensal com navegação, destaque do dia atual, horários, clientes e status.
 - Popup com todas as consultas do dia e acesso às informações do paciente.
 - Botão **Criar formulário** e área **Meus formulários** para configurar o agendamento, sem editar código.
+- Modelos de formulário salvos por conta, reutilizáveis e editáveis. Cada novo formulário recebe uma cópia independente das perguntas.
+- Editor de campos básicos e até 50 perguntas adicionais, com tipos de resposta, ajuda, ordem e obrigatoriedade.
+- Histórico das perguntas e respostas preservado após renomear ou remover campos.
 - Formulários com título, mensagem de apresentação e link público fixo. É possível pausar e reativar cada formulário.
 - Cadastro e edição de nutricionistas, incluindo nome, CRN e situação. Desativar um profissional retira seus horários das opções públicas.
 - Cadastro de vários horários de uma vez para cada dia e profissional: `08:00, 09:00, 10:30, 14:00`.
@@ -62,12 +65,14 @@ As migrações adicionam os novos campos e tabelas sem apagar os clientes e agen
 
 ## Configurar o formulário
 
-1. Na agenda, clique em **Criar formulário**. Escolha o título e a mensagem que o paciente verá.
+1. Na agenda, clique em **Criar formulário**. Comece com o padrão ou selecione um **Modelo salvo**. Um modelo copia a apresentação e as perguntas; título e mensagem podem ser ajustados na configuração.
 2. Em **Nutricionistas**, cadastre os profissionais. O botão **Editar** permite alterar nome, CRN e situação.
 3. Em **Dias e horários**, escolha o nutricionista, o dia e informe horários separados por vírgula. É possível cadastrar datas de hoje até os próximos dois anos, no limite de 2100; horários de hoje já encerrados são recusados.
 4. Ajuste os horários pelos botões **Editar**, **Pausar** e **Ativar**. Repetir um horário no mesmo formulário não duplica o cadastro. Um horário do mesmo profissional não pode ser oferecido em dois formulários diferentes.
 5. Copie o link mostrado no topo. Alterar os dados não muda esse link. **Disponível para pacientes** controla se o formulário pode ser acessado.
-6. Use **Meus formulários** para voltar à configuração posteriormente.
+6. Em **Editar perguntas**, personalize os campos e adicione novas perguntas. Salve para atualizar o formulário público.
+7. Use **Salvar como modelo**, dê um nome e reutilize-o em **Meus formulários → Modelos salvos → Usar modelo**.
+8. Use **Meus formulários** para voltar à configuração posteriormente.
 
 O paciente não precisa de login. O endereço compartilhado deve usar um domínio acessível aos pacientes; `127.0.0.1` é apenas para testes na própria máquina. Esta implementação não publica o site nem envia mensagens aos pacientes.
 
@@ -91,7 +96,19 @@ Os **nutricionistas cadastrados no formulário** são profissionais da conta res
 | Motivo da consulta | Obrigatório |
 | Observações | Opcional |
 
-Os campos estáveis do paciente estão definidos em `agenda/forms.py` e `agenda/templates/agenda/formulario_publico.html`. Dias, horários, profissionais, título e apresentação são dados editáveis pela interface e pelo admin, sem modificar Python ou HTML.
+A tabela descreve o formulário padrão. Em **Editar perguntas**, os rótulos e textos de ajuda de todos os campos podem ser alterados. Nutricionista, data, horário, nome e contato permanecem visíveis e obrigatórios para viabilizar o agendamento. Os outros campos básicos podem ser ocultados ou definidos como opcionais. As perguntas de detalhes de saúde e medicações só aparecem quando a resposta correspondente é **Sim**, mesmo quando configuradas como obrigatórias.
+
+## Perguntas e modelos reutilizáveis
+
+O editor oferece **resposta curta**, **resposta longa**, **número** (até duas casas decimais), **data**, **sim ou não** e **escolha única** (2 a 30 opções diferentes). Cada formulário aceita até 50 perguntas adicionais, com rótulo, texto de ajuda, obrigatoriedade e ordem editáveis. Marque **Remover pergunta** e salve para excluir um campo das próximas submissões. O JavaScript é necessário para adicionar novas perguntas pela interface.
+
+Os modelos ficam persistidos no banco e pertencem à conta que os criou. Salvar um modelo copia o título, a mensagem, as configurações dos campos básicos e as perguntas adicionais. Não copia respostas de pacientes, datas ou horários: as disponibilidades são configuradas individualmente para cada formulário, usando os profissionais cadastrados na conta.
+
+Editar um modelo afeta os próximos formulários criados a partir dele. Formulários já existentes são cópias independentes, com links próprios, e podem ser ajustados sem alterar o modelo. Para guardar uma nova variação, use **Salvar como modelo** novamente.
+
+Cada reserva nova guarda os textos das perguntas e suas respostas no momento do envio. Renomear, ocultar ou remover perguntas não altera as fichas recebidas. Fichas da versão anterior continuam sendo exibidas. Edições concorrentes do questionário são recusadas para evitar sobrescrever alterações; um paciente que estava preenchendo durante uma mudança recebe um aviso para conferir os novos campos e enviar novamente.
+
+Dias, horários, profissionais, título, apresentação e perguntas são editáveis pela interface, sem modificar Python ou HTML. Os esquemas de perguntas são administrados pelo editor, e ficam somente para leitura no admin.
 
 ## Reservas e informações do paciente
 
@@ -107,7 +124,7 @@ Nesta etapa, cada horário é uma opção pontual: não há duração de consult
 
 ## Administração e demonstração
 
-O admin permite gerenciar clientes, consultas, formulários, nutricionistas, disponibilidades e fichas. Superusuários podem administrar todas as contas; usuários com acesso ao admin e permissões dos modelos ficam limitados aos registros da própria conta. A configuração pela interface não exige acesso ao admin.
+O admin permite gerenciar clientes, consultas, formulários, modelos salvos, nutricionistas, disponibilidades e fichas. As fichas novas com histórico de perguntas e respostas ficam somente para leitura, preservando o registro recebido. Superusuários podem administrar todas as contas; usuários com acesso ao admin e permissões dos modelos ficam limitados aos registros da própria conta. A configuração pela interface não exige acesso ao admin.
 
 Para popular o calendário com os exemplos da primeira versão:
 
@@ -125,6 +142,7 @@ NutriAgenda/
 ├── agenda/
 │   ├── models.py                 # Clientes, profissionais, formulários, slots, consultas e fichas
 │   ├── forms.py                  # Campos e validação de configuração e agendamento
+│   ├── questionarios.py           # Esquema, editor e tipos de pergunta
 │   ├── services.py               # Reserva transacional
 │   ├── admin.py                  # Administração e separação entre contas
 │   ├── views.py                  # Calendário e API de consultas do dia
@@ -134,7 +152,8 @@ NutriAgenda/
 │   ├── templates/agenda/         # Templates Django
 │   ├── static/agenda/            # CSS e JavaScript, sem dependências externas
 │   ├── tests.py
-│   └── test_formularios.py
+│   ├── test_formularios.py
+│   └── test_questionarios.py
 ├── docs/                         # Capturas de tela com dados fictícios
 ├── manage.py
 └── requirements.txt
@@ -147,6 +166,10 @@ Todas as imagens usam dados fictícios. Os links mostrados nas capturas são loc
 ![Configuração do formulário](docs/configurar-formulario.png)
 
 ![Formulário do paciente](docs/formulario-paciente.png)
+
+![Editor de perguntas](docs/editor-perguntas.png)
+
+![Modelos salvos](docs/modelos-salvos.png)
 
 ![Calendário mensal](docs/calendario.png)
 
@@ -162,6 +185,9 @@ A versão do formulário para celular está em `docs/formulario-paciente-mobile.
 | GET | `/formularios/` | Lista dos formulários da conta |
 | GET / POST | `/formularios/novo/` | Criar um formulário |
 | GET / POST | `/formularios/<token>/editar/` | Configurar o formulário |
+| GET / POST | `/formularios/<token>/perguntas/` | Editar campos e perguntas |
+| GET / POST | `/formularios/<token>/salvar-modelo/` | Salvar modelo reutilizável |
+| GET / POST | `/modelos/<id>/editar/` | Editar um modelo salvo |
 | GET / POST | `/nutricionistas/<id>/editar/` | Editar um profissional |
 | GET / POST | `/disponibilidades/<id>/editar/` | Editar um horário |
 | POST | `/disponibilidades/<id>/situacao/` | Pausar ou ativar um horário |
@@ -182,7 +208,7 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 ```
 
-Os 39 testes cobrem calendário, autenticação, isolamento entre contas, campos e validação, opções dependentes, configuração, horários pausados, cancelamento, rollback e reserva simultânea por dois pacientes. O fluxo também foi conferido em Chromium, incluindo as telas para celular.
+Os 53 testes cobrem calendário, autenticação, isolamento entre contas, campos e validação, opções dependentes, configuração, horários pausados, cancelamento, rollback, reserva simultânea por dois pacientes, modelos salvos, cópias independentes, perguntas dinâmicas, validação dos tipos de resposta, preservação do histórico e edições concorrentes. O fluxo também foi conferido em Chromium, incluindo as telas para celular.
 
 ## Configuração do ambiente
 

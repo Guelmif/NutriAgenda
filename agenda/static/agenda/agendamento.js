@@ -92,6 +92,7 @@
   ]) {
     const field = document.getElementById(fieldId);
     const container = document.getElementById(containerId);
+    if (!field || !container) continue;
     const update = () => {
       container.hidden = field.value !== "sim";
     };

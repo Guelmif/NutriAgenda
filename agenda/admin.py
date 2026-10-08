@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente, FormularioAgendamento, Profissional
+from django.db.models import F
+from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente, FormularioAgendamento, ModeloFormulario, Profissional
 
 
 @admin.register(Cliente)
@@ -73,7 +74,31 @@ class ProfissionalAdmin(ResponsavelAdmin):
 @admin.register(FormularioAgendamento)
 class FormularioAdmin(ResponsavelAdmin):
     list_display = ['titulo', 'responsavel', 'ativo']
-    readonly_fields = ['token']
+    readonly_fields = ['token', 'campos_padrao', 'perguntas', 'versao']
+
+    def save_model(self, request, obj, form, change):
+        if change:
+            # Presentation edits must not overwrite a concurrent schema edit.
+            obj.save(update_fields=['titulo', 'descricao', 'ativo', 'responsavel'])
+        else:
+            super().save_model(request, obj, form, change)
+
+
+
+@admin.register(ModeloFormulario)
+class ModeloFormularioAdmin(ResponsavelAdmin):
+    list_display = ['nome', 'titulo', 'responsavel']
+    readonly_fields = ['campos_padrao', 'perguntas', 'versao']
+
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser:
+            obj.responsavel = request.user
+        obj.versao = F('versao') + 1
+        obj.save(update_fields=['nome', 'titulo', 'descricao', 'responsavel', 'versao'])
+
+
+    def has_add_permission(self, request):
+        return False  # Save complete templates through the questionnaire editor.
 
 
 @admin.register(Disponibilidade)
@@ -101,7 +126,12 @@ class DisponibilidadeAdmin(admin.ModelAdmin):
 @admin.register(FichaPaciente)
 class FichaPacienteAdmin(admin.ModelAdmin):
     list_display = ['agendamento', 'idade']
-    readonly_fields = ['agendamento']
+    readonly_fields = ['agendamento', 'respostas']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.respostas:
+            return [field.name for field in FichaPaciente._meta.fields]
+        return self.readonly_fields
 
     def has_add_permission(self, request):
         return False

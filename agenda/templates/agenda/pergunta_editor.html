@@ -1,0 +1,4 @@
+<article class="question-card">
+  {{ pergunta.identificador }}{{ pergunta.non_field_errors }}
+  <div class="form-grid">{% include 'agenda/campo.html' with field=pergunta.rotulo %}{% include 'agenda/campo.html' with field=pergunta.tipo %}{% include 'agenda/campo.html' with field=pergunta.ajuda %}{% include 'agenda/campo.html' with field=pergunta.ordem %}<div class="full-width question-options">{% include 'agenda/campo.html' with field=pergunta.opcoes %}</div>{% include 'agenda/campo.html' with field=pergunta.obrigatoria %}<div class="question-delete">{% include 'agenda/campo.html' with field=pergunta.DELETE %}</div></div>
+</article>

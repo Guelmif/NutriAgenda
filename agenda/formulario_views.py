@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,9 +12,10 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from .forms import DisponibilidadeForm, FormularioConfigForm, HorariosForm, PacienteAgendamentoForm, ProfissionalForm
-from .models import Agendamento, Disponibilidade, FormularioAgendamento, Profissional
+from .forms import CriarFormularioForm, DisponibilidadeForm, ModeloFormularioForm, SalvarModeloForm, FormularioConfigForm, HorariosForm, PacienteAgendamentoForm, ProfissionalForm
+from .models import Agendamento, Disponibilidade, FormularioAgendamento, ModeloFormulario, Profissional
 from .services import reservar_consulta
+from .questionarios import editores, salvar_schema
 
 
 @login_required
@@ -21,17 +23,21 @@ from .services import reservar_consulta
 @require_GET
 def formularios(request):
     items = FormularioAgendamento.objects.filter(responsavel=request.user).annotate(total_horarios=Count('disponibilidades'))
-    return render(request, 'agenda/formularios.html', {'formularios': items})
+    return render(request, 'agenda/formularios.html', {'formularios': items, 'modelos': ModeloFormulario.objects.filter(responsavel=request.user)})
 
 
 @login_required
 @never_cache
 @require_http_methods(['GET', 'POST'])
 def criar_formulario(request):
-    form = FormularioConfigForm(request.POST or None)
+    form = CriarFormularioForm(request.POST or None, responsavel=request.user, initial={'modelo': request.GET.get('modelo')})
     if request.method == 'POST' and form.is_valid():
         item = form.save(commit=False)
         item.responsavel = request.user
+        modelo = form.cleaned_data['modelo']
+        if modelo:
+            item.titulo, item.descricao = modelo.titulo, modelo.descricao
+            item.campos_padrao, item.perguntas = deepcopy(modelo.campos_padrao), deepcopy(modelo.perguntas)
         item.save()
         messages.success(request, 'Formulário criado. Agora adicione os nutricionistas e horários disponíveis.')
         return redirect('agenda:editar_formulario', token=item.token)
@@ -143,7 +149,9 @@ def formulario_publico(request, token):
     if request.method == 'POST' and form.is_valid():
         try:
             reservar_consulta(form)
-        except (ValidationError, IntegrityError, Disponibilidade.DoesNotExist):
+        except ValidationError as error:
+            form.add_error(None, ' '.join(error.messages))
+        except (IntegrityError, Disponibilidade.DoesNotExist):
             form.add_error('horario', 'Este horário não está mais disponível. Selecione outro e envie novamente.')
         except OperationalError:
             # SQLite may reject simultaneous writes rather than wait for a row lock.
@@ -186,3 +194,57 @@ def formulario_sucesso(request, token):
 def detalhes_agendamento(request, pk):
     item = get_object_or_404(Agendamento.objects.select_related('cliente', 'profissional', 'ficha'), pk=pk, cliente__nutricionista=request.user)
     return render(request, 'agenda/detalhes_agendamento.html', {'agendamento': item})
+
+
+@login_required
+@never_cache
+@require_http_methods(['GET', 'POST'])
+def editar_perguntas(request, token=None, pk=None):
+    is_model = pk is not None
+    if is_model:
+        item = get_object_or_404(ModeloFormulario, pk=pk, responsavel=request.user)
+    else:
+        item = get_object_or_404(FormularioAgendamento, token=token, responsavel=request.user)
+    data = request.POST if request.method == 'POST' else None
+    base, custom = editores(item, data)
+    meta = ModeloFormularioForm(data, instance=item, prefix='modelo') if is_model else None
+    stale = request.method == 'POST' and request.POST.get('versao') != str(item.versao)
+    if request.method == 'POST':
+        valid = base.is_valid() & custom.is_valid()
+        if meta:
+            valid = meta.is_valid() and valid
+        if valid and not stale:
+            with transaction.atomic():
+                # Optimistic version check and write lock work on SQLite and PostgreSQL.
+                changed = type(item).objects.filter(pk=item.pk, versao=item.versao).update(versao=F('versao') + 1)
+                if changed:
+                    if meta:
+                        item = meta.save(commit=False)
+                    salvar_schema(item, base, custom)
+                    item.versao += 1
+                    item.save() if is_model else item.save(update_fields=['campos_padrao', 'perguntas', 'versao'])
+                else:
+                    stale = True
+            if not stale:
+                messages.success(request, 'Modelo atualizado. Os formulários já criados continuam independentes.' if is_model else 'Perguntas atualizadas. As respostas anteriores foram preservadas.')
+                return redirect('agenda:formularios') if is_model else redirect('agenda:editar_formulario', token=item.token)
+        if stale:
+            messages.error(request, 'Outra edição foi salva. Atualize a página antes de editar novamente.')
+    return render(request, 'agenda/editar_perguntas.html', {
+        'item': item, 'modelo': is_model, 'base_formset': base, 'perguntas_formset': custom, 'meta_form': meta,
+    })
+
+
+@login_required
+@never_cache
+@require_http_methods(['GET', 'POST'])
+def salvar_modelo(request, token):
+    item = get_object_or_404(FormularioAgendamento, token=token, responsavel=request.user)
+    form = SalvarModeloForm(request.POST if request.method == 'POST' else None)
+    if request.method == 'POST' and form.is_valid():
+        ModeloFormulario.objects.create(responsavel=request.user, nome=form.cleaned_data['nome'],
+            titulo=item.titulo, descricao=item.descricao, campos_padrao=deepcopy(item.campos_padrao),
+            perguntas=deepcopy(item.perguntas))
+        messages.success(request, 'Modelo salvo na sua conta. Use-o ao criar os próximos formulários.')
+        return redirect('agenda:formularios')
+    return render(request, 'agenda/salvar_modelo.html', {'form': form, 'formulario': item})

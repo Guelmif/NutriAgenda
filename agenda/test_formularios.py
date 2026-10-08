@@ -33,7 +33,7 @@ class FormulariosTests(TestCase):
         self.url = reverse('agenda:formulario_publico', args=[self.formulario.token])
         self.config_url = reverse('agenda:editar_formulario', args=[self.formulario.token])
         self.payload = {
-            'profissional': self.prof.pk, 'data': self.dia.isoformat(), 'horario': '09:00',
+            'versao': self.formulario.versao, 'profissional': self.prof.pk, 'data': self.dia.isoformat(), 'horario': '09:00',
             'nome': 'Paciente de teste', 'idade': 28, 'contato': '(16) 99999-9999',
             'tem_problemas_saude': 'sim', 'problemas_saude': 'Informação de saúde de teste',
             'usa_medicacoes': 'sim', 'medicacoes': 'Medicação de teste',
@@ -251,7 +251,7 @@ class ReservaConcorrenteTests(TransactionTestCase):
         dia = timezone.localdate() + timedelta(days=2)
         Disponibilidade.objects.create(formulario=formulario, profissional=professional, data=dia, horario=time(9))
         payload = {
-            'profissional': professional.pk, 'data': dia.isoformat(), 'horario': '09:00',
+            'versao': formulario.versao, 'profissional': professional.pk, 'data': dia.isoformat(), 'horario': '09:00',
             'idade': 30, 'contato': '16999999999', 'tem_problemas_saude': 'nao',
             'usa_medicacoes': 'nao', 'motivo_consulta': 'Atendimento nutricional',
         }
