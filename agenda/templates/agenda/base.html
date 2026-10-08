@@ -8,6 +8,7 @@
   <title>{% block title %}NutriAgenda{% endblock %}</title>
   <link rel="icon" href="{% static 'agenda/favicon.svg' %}" type="image/svg+xml">
   <link rel="stylesheet" href="{% static 'agenda/agenda.css' %}">
+  <link rel="stylesheet" href="{% static 'agenda/formularios.css' %}">
   {% block scripts %}{% endblock %}
 </head>
 <body>
@@ -26,6 +27,7 @@
       {% endif %}
     </div>
   </header>
+  {% if messages %}<div class="flash-messages" aria-live="polite">{% for message in messages %}<p class="flash-message">{{ message }}</p>{% endfor %}</div>{% endif %}
   {% block content %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,12 @@
+{% extends 'agenda/base.html' %}
+{% block title %}Meus formulários · NutriAgenda{% endblock %}
+{% block content %}
+<main id="conteudo" class="main-content">
+  <a class="back-link" href="{% url 'agenda:calendario' %}">← Voltar para a agenda</a>
+  <section class="page-heading"><div><p class="eyebrow">AGENDAMENTO ONLINE</p><h1>Meus formulários<span class="heading-dot">.</span></h1><p class="subtitle">Organize os profissionais e horários que seus pacientes podem escolher.</p></div><a class="primary-button" href="{% url 'agenda:criar_formulario' %}">+ Criar formulário</a></section>
+  <div class="form-list">
+    {% for item in formularios %}<article class="panel form-list-item"><div><span class="small-badge {% if not item.ativo %}muted-badge{% endif %}">{% if item.ativo %}Ativo{% else %}Pausado{% endif %}</span><h2>{{ item.titulo }}</h2><p class="subtitle">{{ item.total_horarios }} horário{{ item.total_horarios|pluralize:'s' }} cadastrado{{ item.total_horarios|pluralize:'s' }}</p></div><a class="today-button" href="{% url 'agenda:editar_formulario' item.token %}">Editar formulário</a></article>
+    {% empty %}<div class="panel empty-state"><strong>Seu primeiro formulário começa aqui</strong><p>Crie um formulário, cadastre nutricionistas e escolha os dias e horários disponíveis.</p></div>{% endfor %}
+  </div>
+</main>
+{% endblock %}

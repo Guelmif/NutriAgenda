@@ -109,11 +109,11 @@ class AgendaTests(TestCase):
         self.assertEqual(self.client.post('/').status_code, 405)
         self.assertEqual(self.client.post(reverse('agenda:agendamentos_do_dia')).status_code, 405)
 
-    def test_future_form_button_is_disabled(self):
+    def test_form_button_opens_creation_screen(self):
         response = self.client.get('/')
-        self.assertContains(response, 'disabled aria-describedby="formulario-aviso"')
+        self.assertContains(response, 'href="/formularios/novo/"')
         self.assertContains(response, 'Criar formulário')
-        self.assertContains(response, 'Em breve')
+        self.assertNotContains(response, 'Em breve')
 
     def test_admin_limits_querysets_and_client_choices_to_owner(self):
         request = RequestFactory().get('/admin/')

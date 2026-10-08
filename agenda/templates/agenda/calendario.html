@@ -11,10 +11,10 @@
       <p class="subtitle">Mais clareza na rotina. Mais tempo para cuidar.</p>
     </div>
     <div class="form-action">
-      <button class="primary-button" type="button" disabled aria-describedby="formulario-aviso">
+      <a class="primary-button" href="{% url 'agenda:criar_formulario' %}">
         <span aria-hidden="true">+</span> Criar formulário
-      </button>
-      <span id="formulario-aviso" class="coming-soon">Em breve</span>
+      </a>
+      <a class="text-button" href="{% url 'agenda:formularios' %}">Meus formulários</a>
     </div>
   </section>
 

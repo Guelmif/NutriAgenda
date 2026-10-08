@@ -27,8 +27,21 @@ function renderAppointments(appointments) {
     const details = element("div", "appointment-details");
     details.append(
       element("p", "appointment-name", appointment.cliente),
-      element("p", "appointment-kind", "Consulta nutricional"),
+      element(
+        "p",
+        "appointment-kind",
+        appointment.nutricionista || "Consulta nutricional",
+      ),
     );
+    if (appointment.detalhes_url) {
+      const link = element(
+        "a",
+        "appointment-link",
+        "Ver informações do paciente",
+      );
+      link.href = appointment.detalhes_url;
+      details.append(link);
+    }
     const status = ["confirmado", "pendente", "cancelado"].includes(
       appointment.status,
     )

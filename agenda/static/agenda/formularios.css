@@ -1,0 +1,416 @@
+.back-link {
+  display: inline-block;
+  color: var(--green);
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.narrow-content {
+  max-width: 800px;
+}
+.panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 26px;
+  margin-top: 22px;
+}
+.panel h2 {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.panel.editor-form {
+  margin-top: 28px;
+}
+.panel .editor-form {
+  margin-top: 22px;
+}
+.editor-form .primary-button {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.form-field > label,
+.checkbox-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.form-field input:not([type="checkbox"]),
+.form-field select,
+.form-field textarea,
+.share-controls > input {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #dbe5dc;
+  background: #fdfefd;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--ink);
+  font: inherit;
+}
+.form-field input[type="checkbox"] {
+  accent-color: var(--green);
+  height: 16px;
+  width: 16px;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+.form-field textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.form-field select:disabled {
+  background: #f3f6f1;
+  color: var(--muted);
+}
+.field-help {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.field-error {
+  color: #a54848;
+  font-size: 12px;
+}
+.required-marker {
+  color: var(--green);
+}
+.form-field .errorlist {
+  color: #a54848;
+  font-size: 12px;
+  padding-left: 20px;
+}
+.flash-messages {
+  max-width: 1200px;
+  margin: 20px auto 0;
+  padding: 0 32px;
+}
+.flash-message {
+  background: #eaf5ed;
+  border: 1px solid #d7e9dd;
+  color: var(--green);
+  padding: 14px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+.configuration-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.configuration-grid > .panel {
+  min-width: 0;
+}
+.share-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.share-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 52%;
+}
+.share-controls > input {
+  width: 100%;
+  font-size: 12px;
+  background: #f9fbf8;
+}
+.share-controls .today-button {
+  margin: 0;
+}
+.small-badge {
+  display: inline-block;
+  font-size: 10px;
+  background: #eaf5ed;
+  color: var(--green);
+  padding: 4px 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.muted-badge {
+  color: #7b847d;
+  background: #f0f3ef;
+}
+.professional-list {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+}
+.professional-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  gap: 12px;
+}
+.professional-list strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.professional-list .field-help {
+  margin-top: 2px;
+}
+details summary {
+  color: var(--green);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+.slot-create-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  align-items: start;
+  gap: 16px;
+}
+.slot-create-form .primary-button {
+  grid-column: 1/-1;
+  width: max-content;
+}
+.slot-create-form .error-message {
+  grid-column: 1/-1;
+}
+.availability-table-wrapper {
+  overflow-x: auto;
+  margin-top: 24px;
+}
+.availability-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.availability-table th {
+  text-align: left;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: #f9fbf8;
+}
+.availability-table th,
+.availability-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.availability-table td {
+  overflow-wrap: anywhere;
+  max-width: 240px;
+}
+.availability-table .small-badge {
+  margin: 0;
+}
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.table-actions .text-button {
+  font-size: 11px;
+}
+.availability-note {
+  margin-top: 18px;
+}
+.form-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.form-list-item > div {
+  min-width: 0;
+}
+.form-list-item h2 {
+  overflow-wrap: anywhere;
+}
+.form-list-item .today-button {
+  flex-shrink: 0;
+}
+.booking-main {
+  max-width: 870px;
+  margin: auto;
+  padding: 45px 24px;
+}
+.booking-heading {
+  margin: 0 4px 28px;
+}
+.booking-heading h1 {
+  font-size: 32px;
+  overflow-wrap: anywhere;
+}
+.booking-description {
+  overflow-wrap: anywhere;
+}
+.booking-form > .panel {
+  margin-top: 20px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 22px;
+}
+.form-grid.three-columns {
+  grid-template-columns: 1.25fr 1fr 1fr;
+}
+.full-width {
+  grid-column: 1/-1;
+}
+.section-description {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+.booking-submit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-top: 24px;
+}
+.booking-submit .primary-button {
+  flex-shrink: 0;
+}
+.success-panel {
+  text-align: center;
+  padding: 50px 32px;
+  margin-top: 30px;
+}
+.success-check {
+  display: grid;
+  place-items: center;
+  color: var(--green);
+  background: var(--green-light);
+  border-radius: 50%;
+  height: 52px;
+  width: 52px;
+  margin: 0 auto 24px;
+  font-size: 26px;
+}
+.success-panel h1 {
+  font-size: 30px;
+}
+.success-panel .today-button {
+  display: inline-block;
+  margin-top: 26px;
+}
+.patient-details {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 18px;
+  margin: 0;
+  font-size: 13px;
+}
+.patient-details dt {
+  font-weight: 600;
+}
+.patient-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.patient-details dd p {
+  margin-top: 5px;
+}
+.appointment-link {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--green);
+  text-decoration: underline;
+  margin-top: 6px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .panel {
+    padding: 20px;
+  }
+  .configuration-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .share-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .share-controls {
+    width: 100%;
+  }
+  .share-controls .today-button {
+    margin: 0;
+  }
+  .slot-create-form {
+    grid-template-columns: 1fr;
+  }
+  .slot-create-form .primary-button {
+    grid-column: auto;
+  }
+  .availability-table {
+    min-width: 470px;
+  }
+  .booking-main {
+    padding: 28px 16px;
+  }
+  .booking-heading h1 {
+    font-size: 28px;
+  }
+  .form-grid,
+  .form-grid.three-columns {
+    grid-template-columns: 1fr;
+  }
+  .full-width {
+    grid-column: auto;
+  }
+  .booking-submit {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .booking-submit .primary-button {
+    font-size: 13px;
+    padding: 13px;
+  }
+  .patient-details {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .patient-details dd {
+    margin-bottom: 14px;
+  }
+  .form-list-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .form-list-item .today-button {
+    margin-left: 0;
+  }
+  .main-content > .page-heading {
+    flex-wrap: wrap;
+  }
+  .flash-messages {
+    padding: 0 16px;
+  }
+  .form-field input,
+  .form-field textarea,
+  .form-field select {
+    font-size: 16px !important;
+  }
+  .success-panel {
+    padding: 34px 22px;
+  }
+}

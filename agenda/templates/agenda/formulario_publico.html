@@ -1,0 +1,19 @@
+{% extends 'agenda/base.html' %}
+{% load static %}
+{% block title %}{{ formulario.titulo }} · NutriAgenda{% endblock %}
+{% block scripts %}<script src="{% static 'agenda/agendamento.js' %}" defer></script>{% endblock %}
+{% block content %}
+<main id="conteudo" class="booking-main">
+  <div class="booking-heading"><p class="eyebrow">CUIDAR DE VOCÊ COMEÇA AQUI</p><h1>{{ formulario.titulo }}<span class="heading-dot">.</span></h1>{% if formulario.descricao %}<p class="subtitle booking-description">{{ formulario.descricao|linebreaksbr }}</p>{% else %}<p class="subtitle">Escolha sua consulta e conte um pouco sobre você.</p>{% endif %}</div>
+  {% if not tem_horarios %}<p class="error-message" role="status">No momento, não há horários disponíveis. Consulte o consultório para saber quando novos horários serão abertos.</p>{% endif %}
+  <noscript><p class="error-message">Ative o JavaScript para selecionar o nutricionista, a data e o horário.</p></noscript>
+  <form id="booking-form" method="post" class="booking-form" data-endpoint="{% url 'agenda:disponibilidades_publicas' formulario.token %}">
+    {% csrf_token %}
+    {% if form.errors %}<div class="error-message" role="alert"><strong>Confira os campos abaixo antes de enviar.</strong>{{ form.non_field_errors }}</div>{% endif %}
+    <section class="panel"><p class="eyebrow">01 · SUA CONSULTA</p><h2>Escolha um horário</h2><p class="section-description">As opções são atualizadas conforme a disponibilidade do consultório.</p><div class="form-grid three-columns">{% include 'agenda/campo.html' with field=form.profissional %}{% include 'agenda/campo.html' with field=form.data %}{% include 'agenda/campo.html' with field=form.horario %}</div><p id="availability-feedback" class="field-help" aria-live="polite"></p></section>
+    <section class="panel"><p class="eyebrow">02 · SOBRE VOCÊ</p><h2>Dados do paciente</h2><div class="form-grid">{% include 'agenda/campo.html' with field=form.nome %}{% include 'agenda/campo.html' with field=form.idade %}<div class="full-width">{% include 'agenda/campo.html' with field=form.contato %}</div></div></section>
+    <section class="panel"><p class="eyebrow">03 · SEU ATENDIMENTO</p><h2>Informações para a consulta</h2><div class="form-grid">{% include 'agenda/campo.html' with field=form.tem_problemas_saude %}{% include 'agenda/campo.html' with field=form.usa_medicacoes %}<div id="health-details">{% include 'agenda/campo.html' with field=form.problemas_saude %}</div><div id="medication-details">{% include 'agenda/campo.html' with field=form.medicacoes %}</div><div class="full-width">{% include 'agenda/campo.html' with field=form.ultimos_exames %}</div><div class="full-width">{% include 'agenda/campo.html' with field=form.motivo_consulta %}</div><div class="full-width">{% include 'agenda/campo.html' with field=form.observacoes %}</div></div></section>
+    <div class="booking-submit"><p class="field-help">Os campos com * são obrigatórios.<br>A solicitação ficará pendente de confirmação pelo consultório.</p><button id="submit-booking" class="primary-button" type="submit" {% if not tem_horarios %}disabled{% endif %}>Solicitar agendamento →</button></div>
+  </form>
+</main>
+{% endblock %}

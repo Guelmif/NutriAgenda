@@ -1,0 +1,2 @@
+{% if form.non_field_errors %}<div class="error-message" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+{% for field in form %}{% include 'agenda/campo.html' with field=field %}{% endfor %}

@@ -5,6 +5,7 @@ from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
@@ -80,7 +81,7 @@ def agendamentos_do_dia(request):
 
     agendamentos = Agendamento.objects.filter(
         cliente__nutricionista=request.user, data=dia,
-    ).select_related('cliente')
+    ).select_related('cliente', 'profissional', 'ficha')
     return JsonResponse({
         'data': dia.isoformat(),
         'agendamentos': [
@@ -88,6 +89,8 @@ def agendamentos_do_dia(request):
                 'id': a.pk, 'cliente': a.cliente.nome,
                 'horario': a.horario.strftime('%H:%M'),
                 'status': a.status, 'status_label': a.get_status_display(),
+                **({'nutricionista': a.profissional.nome} if a.profissional_id else {}),
+                **({'detalhes_url': reverse('agenda:detalhes_agendamento', args=[a.pk])} if hasattr(a, 'ficha') else {}),
             } for a in agendamentos
         ],
     })
