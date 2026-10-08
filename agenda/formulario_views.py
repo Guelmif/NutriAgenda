@@ -190,14 +190,6 @@ def formulario_sucesso(request, token):
 
 @login_required
 @never_cache
-@require_GET
-def detalhes_agendamento(request, pk):
-    item = get_object_or_404(Agendamento.objects.select_related('cliente', 'profissional', 'ficha'), pk=pk, cliente__nutricionista=request.user)
-    return render(request, 'agenda/detalhes_agendamento.html', {'agendamento': item})
-
-
-@login_required
-@never_cache
 @require_http_methods(['GET', 'POST'])
 def editar_perguntas(request, token=None, pk=None):
     is_model = pk is not None

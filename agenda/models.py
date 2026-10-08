@@ -129,6 +129,7 @@ class Agendamento(models.Model):
         CONFIRMADO = 'confirmado', 'Confirmado'
         PENDENTE = 'pendente', 'Pendente'
         CANCELADO = 'cancelado', 'Cancelado'
+        CONCLUIDO = 'concluido', 'Concluído'
 
     cliente = models.ForeignKey(
         Cliente, on_delete=models.PROTECT, related_name='agendamentos',
@@ -141,6 +142,10 @@ class Agendamento(models.Model):
     status = models.CharField(
         'status', max_length=12, choices=Status.choices, default=Status.CONFIRMADO,
     )
+
+    concluido_em = models.DateTimeField('concluído em', null=True, blank=True)
+    cancelado_em = models.DateTimeField('cancelado em', null=True, blank=True)
+    motivo_cancelamento = models.TextField('motivo do cancelamento', max_length=2000, blank=True)
 
     class Meta:
         ordering = ['data', 'horario', 'pk']
@@ -189,3 +194,66 @@ class FichaPaciente(models.Model):
 
     def __str__(self):
         return str(self.agendamento)
+
+
+class RegistroSessao(models.Model):
+    agendamento = models.OneToOneField(Agendamento, on_delete=models.CASCADE, related_name='sessao')
+    observacoes = models.TextField('observações da sessão', max_length=10000, blank=True)
+    plano_alimentar = models.TextField('plano alimentar', max_length=10000, blank=True)
+    orientacoes = models.TextField('orientações e próximos passos', max_length=10000, blank=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    atualizado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='sessoes_editadas')
+    versao = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        verbose_name = 'registro da sessão'
+        verbose_name_plural = 'registros das sessões'
+
+    def __str__(self):
+        return str(self.agendamento)
+
+
+class AlteracaoStatus(models.Model):
+    agendamento = models.ForeignKey(Agendamento, on_delete=models.CASCADE, related_name='alteracoes_status')
+    anterior = models.CharField(max_length=12, choices=Agendamento.Status.choices)
+    novo = models.CharField(max_length=12, choices=Agendamento.Status.choices)
+    motivo = models.TextField(max_length=2000, blank=True)
+    realizado_em = models.DateTimeField(auto_now_add=True)
+    realizado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='alteracoes_consultas')
+
+    class Meta:
+        ordering = ['-realizado_em', '-pk']
+        verbose_name = 'alteração de consulta'
+        verbose_name_plural = 'alterações de consultas'
+
+
+class MembroEquipe(models.Model):
+    responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='membros_equipe')
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='equipes_compartilhadas')
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['responsavel', 'usuario'], name='unique_team_member')]
+        ordering = ['usuario__username']
+        verbose_name = 'membro da equipe'
+        verbose_name_plural = 'membros da equipe'
+
+    def clean(self):
+        if self.responsavel_id == self.usuario_id:
+            raise ValidationError('A conta responsável já tem acesso à própria equipe.')
+
+
+class RevisaoSessao(models.Model):
+    sessao = models.ForeignKey(RegistroSessao, on_delete=models.CASCADE, related_name='revisoes')
+    versao = models.PositiveIntegerField()
+    observacoes = models.TextField(max_length=10000, blank=True)
+    plano_alimentar = models.TextField(max_length=10000, blank=True)
+    orientacoes = models.TextField(max_length=10000, blank=True)
+    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='revisoes_sessoes')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-versao']
+        constraints = [models.UniqueConstraint(fields=['sessao', 'versao'], name='unique_session_revision')]
+        verbose_name = 'versão do registro da sessão'
+        verbose_name_plural = 'versões dos registros das sessões'

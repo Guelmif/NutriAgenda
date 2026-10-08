@@ -11,6 +11,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from .models import Agendamento
+from .acesso import contas_acessiveis
 
 MESES = (
     '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -35,7 +36,7 @@ def calendario(request):
 
     fim = date(ano, mes, calendar.monthrange(ano, mes)[1])
     agendamentos = list(Agendamento.objects.filter(
-        cliente__nutricionista=request.user, data__range=(inicio, fim),
+        cliente__nutricionista_id__in=contas_acessiveis(request.user), data__range=(inicio, fim),
     ).select_related('cliente'))
     por_dia = defaultdict(list)
     for agendamento in agendamentos:
@@ -63,6 +64,7 @@ def calendario(request):
         'proximo': proximo if proximo[0] <= ANO_MAXIMO else None,
         'total': len(agendamentos),
         'confirmados': sum(a.status == Agendamento.Status.CONFIRMADO for a in agendamentos),
+        'concluidos': sum(a.status == Agendamento.Status.CONCLUIDO for a in agendamentos),
         'pendentes': sum(a.status == Agendamento.Status.PENDENTE for a in agendamentos),
     })
 
@@ -80,7 +82,7 @@ def agendamentos_do_dia(request):
         return JsonResponse({'erro': 'Informe uma data válida no formato AAAA-MM-DD.'}, status=400)
 
     agendamentos = Agendamento.objects.filter(
-        cliente__nutricionista=request.user, data=dia,
+        cliente__nutricionista_id__in=contas_acessiveis(request.user), data=dia,
     ).select_related('cliente', 'profissional', 'ficha')
     return JsonResponse({
         'data': dia.isoformat(),
@@ -90,7 +92,7 @@ def agendamentos_do_dia(request):
                 'horario': a.horario.strftime('%H:%M'),
                 'status': a.status, 'status_label': a.get_status_display(),
                 **({'nutricionista': a.profissional.nome} if a.profissional_id else {}),
-                **({'detalhes_url': reverse('agenda:detalhes_agendamento', args=[a.pk])} if hasattr(a, 'ficha') else {}),
+                'detalhes_url': reverse('agenda:detalhes_agendamento', args=[a.pk]),
             } for a in agendamentos
         ],
     })

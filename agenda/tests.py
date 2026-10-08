@@ -88,8 +88,8 @@ class AgendaTests(TestCase):
         self.assertEqual(response.json(), {
             'data': '2028-02-29',
             'agendamentos': [
-                {'id': self.first.pk, 'cliente': 'Ana Silva', 'horario': '08:00', 'status': 'confirmado', 'status_label': 'Confirmado'},
-                {'id': self.second.pk, 'cliente': 'Ana Silva', 'horario': '15:00', 'status': 'pendente', 'status_label': 'Pendente'},
+                {'id': self.first.pk, 'cliente': 'Ana Silva', 'horario': '08:00', 'status': 'confirmado', 'status_label': 'Confirmado', 'detalhes_url': reverse('agenda:detalhes_agendamento', args=[self.first.pk])},
+                {'id': self.second.pk, 'cliente': 'Ana Silva', 'horario': '15:00', 'status': 'pendente', 'status_label': 'Pendente', 'detalhes_url': reverse('agenda:detalhes_agendamento', args=[self.second.pk])},
             ],
         })
         self.assertIn('no-store', response.headers['Cache-Control'])

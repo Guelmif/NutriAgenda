@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import F
-from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente, FormularioAgendamento, ModeloFormulario, Profissional
+from .models import Agendamento, Cliente, Disponibilidade, FichaPaciente, FormularioAgendamento, ModeloFormulario, Profissional, RegistroSessao, AlteracaoStatus
 
 
 @admin.register(Cliente)
@@ -46,9 +46,17 @@ class AgendamentoAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
-        if obj and obj.disponibilidade_id:
-            return ['disponibilidade', 'profissional', 'data', 'horario']
-        return []
+        return ['cliente', 'disponibilidade', 'profissional', 'data', 'horario', 'status', 'concluido_em', 'cancelado_em', 'motivo_cancelamento'] if obj else ['concluido_em', 'cancelado_em', 'motivo_cancelamento']
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'status':
+            kwargs['choices'] = [(value, label) for value, label in Agendamento.Status.choices if value in ('pendente', 'confirmado')]
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            super().save_model(request, obj, form, change)
+        # Existing records are controlled by the transactional appointment UI.
 
 
 class ResponsavelAdmin(admin.ModelAdmin):
@@ -139,3 +147,31 @@ class FichaPacienteAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related('agendamento__cliente')
         return queryset if request.user.is_superuser else queryset.filter(agendamento__cliente__nutricionista=request.user)
+
+
+class HistoricoAtendimentoAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        items = super().get_queryset(request)
+        return items if request.user.is_superuser else items.filter(agendamento__cliente__nutricionista=request.user)
+
+    def get_readonly_fields(self, request, obj=None):
+        return [field.name for field in self.model._meta.fields]
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(RegistroSessao)
+class RegistroSessaoAdmin(HistoricoAtendimentoAdmin):
+    list_display = ['agendamento', 'atualizado_em', 'atualizado_por']
+
+
+@admin.register(AlteracaoStatus)
+class AlteracaoStatusAdmin(HistoricoAtendimentoAdmin):
+    list_display = ['agendamento', 'anterior', 'novo', 'realizado_em', 'realizado_por']

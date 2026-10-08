@@ -42,9 +42,12 @@ function renderAppointments(appointments) {
       link.href = appointment.detalhes_url;
       details.append(link);
     }
-    const status = ["confirmado", "pendente", "cancelado"].includes(
-      appointment.status,
-    )
+    const status = [
+      "confirmado",
+      "pendente",
+      "cancelado",
+      "concluido",
+    ].includes(appointment.status)
       ? appointment.status
       : "pendente";
     item.append(

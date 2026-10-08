@@ -481,3 +481,122 @@ details summary {
     padding: 0 14px 18px;
   }
 }
+.workspace-nav {
+  max-width: 1200px;
+  padding: 16px 32px 0;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+}
+.workspace-nav a:hover {
+  text-decoration: underline;
+}
+.clinical-heading,
+.clinical-actions,
+.clinical-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.clinical-actions {
+  justify-content: flex-start;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+.clinical-actions .today-button,
+.clinical-heading .today-button {
+  margin: 0;
+}
+.clinical-heading .appointment-status {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.clinical-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+.patient-search {
+  grid-template-columns: 1fr auto;
+}
+.clinical-pagination {
+  justify-content: center;
+  margin-top: 26px;
+}
+.session-details {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0 0;
+  font-size: 13px;
+}
+.session-details dt {
+  font-weight: 650;
+}
+.session-details dd {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+.session-text {
+  margin-top: 16px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.danger-button {
+  color: #9f4040;
+  border-color: #e5c5c5;
+  background: #fff4f2;
+}
+.primary-button.danger-button:hover {
+  background: #fbe6e2;
+}
+.event-preview.concluido,
+.appointment-status.concluido {
+  color: #375899;
+  background: #eaf0fb;
+}
+.status-dot.concluido {
+  background: #5b7fbb;
+}
+.legend {
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  .workspace-nav {
+    padding: 16px 20px 0;
+    gap: 12px 18px;
+  }
+  .clinical-filters,
+  .patient-search {
+    grid-template-columns: 1fr;
+  }
+  .clinical-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .clinical-actions .primary-button,
+  .clinical-actions .today-button {
+    text-align: center;
+  }
+  .clinical-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .clinical-filters .primary-button {
+    width: 100%;
+  }
+}
+.session-revision {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+.session-revision h3 {
+  font-size: 14px;
+}

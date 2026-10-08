@@ -16,7 +16,11 @@ Sistema de agendamento nutricional com **Python e Django**. A agenda mensal est�
 - Edição de data, horário e profissional de disponibilidades sem histórico de reservas. Horários com histórico podem ser pausados e substituídos por novas disponibilidades, preservando as consultas anteriores.
 - Opções de data e horário dependem do nutricionista selecionado. Somente horários futuros, ativos e livres aparecem ao paciente.
 - Reserva com status **Pendente**, integração automática ao calendário e prevenção de duas reservas ativas no mesmo horário para o mesmo profissional.
-- Login, separação entre contas e acesso restrito às respostas de saúde.
+- Controle de atendimentos: confirmar reservas, concluir sessões e cancelar com motivo opcional, mantendo um histórico de alterações com autoria.
+- Catálogo pesquisável de pacientes, cadastro e edição de contatos, histórico de consultas, observações, plano alimentar e orientações por sessão.
+- Histórico das versões das anotações: cada gravação preserva os registros anteriores e identifica o profissional que salvou.
+- Equipes com logins próprios: todos os membros autorizados da mesma conta têm acesso ao histórico completo dos pacientes.
+- Login e acesso restrito às informações clínicas; contas sem vínculo de equipe não compartilham dados.
 - Interface em português, adaptada para celular e com navegação por teclado.
 
 ## Rodar localmente
@@ -76,7 +80,7 @@ As migrações adicionam os novos campos e tabelas sem apagar os clientes e agen
 
 O paciente não precisa de login. O endereço compartilhado deve usar um domínio acessível aos pacientes; `127.0.0.1` é apenas para testes na própria máquina. Esta implementação não publica o site nem envia mensagens aos pacientes.
 
-Os **nutricionistas cadastrados no formulário** são profissionais da conta responsável. Seu cadastro não cria um login separado. Contas de usuários diferentes continuam vendo apenas os próprios formulários e pacientes.
+Os **nutricionistas cadastrados no formulário** são profissionais da conta responsável. Seu cadastro não cria um login separado. Os formulários e sua configuração pertencem à conta responsável. O catálogo, o histórico clínico e o controle de consultas também podem ser compartilhados com membros ativos da equipe.
 
 ## Campos do paciente
 
@@ -112,9 +116,9 @@ Dias, horários, profissionais, título, apresentação e perguntas são editáv
 
 ## Reservas e informações do paciente
 
-Ao enviar, a consulta é registrada como **Pendente** e aquele horário deixa de aparecer para outros pacientes. No calendário, abra o dia e clique em **Ver informações do paciente**. Somente a conta responsável pode abrir essa página; o endpoint público de disponibilidade não inclui nomes de pacientes nem respostas de saúde.
+Ao enviar, a consulta é registrada como **Pendente** e aquele horário deixa de aparecer para outros pacientes. No calendário, abra o dia e clique em **Ver informações do paciente**. A conta responsável e os membros ativos autorizados da equipe podem abrir essa página; o endpoint público de disponibilidade não inclui nomes de pacientes nem respostas de saúde.
 
-A conta responsável pode confirmar ou cancelar consultas pelo admin. Uma consulta **Cancelada** libera o horário, desde que sua disponibilidade, o nutricionista e o formulário continuem ativos e a data ainda não tenha passado. Pausar uma disponibilidade ou desativar um formulário não cancela consultas existentes.
+A conta responsável e os nutricionistas autorizados podem confirmar, concluir ou cancelar consultas pela página **Atendimentos**, sem usar o admin. Uma consulta **Cancelada** libera o horário, desde que sua disponibilidade, o nutricionista e o formulário continuem ativos e a data ainda não tenha passado. Pausar uma disponibilidade ou desativar um formulário não cancela consultas existentes.
 
 A confirmação exibida após o envio indica que a solicitação foi registrada. Não há envio automático de e-mail ou mensagem nem confirmação automática pelo consultório.
 
@@ -122,9 +126,43 @@ O banco impede duas consultas ativas com o mesmo **profissional, data e horário
 
 Nesta etapa, cada horário é uma opção pontual: não há duração de consulta, detecção de sobreposição entre horários diferentes, recorrência semanal ou remarcação pelo paciente. Consultas antigas sem profissional definido não entram na regra de conflito por profissional.
 
+## Controle de atendimentos
+
+Abra **Atendimentos** pelo menu ou selecione um dia no calendário e use **Ver informações do paciente**. A lista permite filtrar pelo paciente, situação e nutricionista. Reservas antigas sem ficha também podem ser controladas.
+
+- **Confirmar consulta:** muda uma reserva pendente para confirmada.
+- **Concluir atendimento:** dá baixa em uma consulta pendente ou confirmada, a partir do horário agendado. Salva a data da conclusão e mantém o horário ocupado no histórico.
+- **Cancelar consulta:** exibe uma página de confirmação, aceita um motivo opcional e registra a data do cancelamento. Um horário futuro, ativo e livre pode ser reservado novamente.
+
+Consultas concluídas e canceladas são estados finais nesta etapa, sem reabertura ou remarcação. O cancelamento preserva as informações recebidas, as anotações existentes e o histórico de alterações. Notas de consultas canceladas ficam somente para leitura. Não há envio automático de mensagens ao paciente.
+
+As alterações registram a situação anterior, a nova, o responsável e a data. Ações com uma situação desatualizada são recusadas. A situação e os dados de consultas existentes ficam somente para leitura no admin; use a interface de atendimentos para as operações transacionais.
+
+## Catálogo e registros das sessões
+
+Em **Pacientes**, busque por nome, e-mail ou telefone e abra **Histórico**. O cadastro exibe as consultas de todos os nutricionistas da mesma conta, com seus status e registros de sessão. Cadastros antigos aparecem automaticamente no catálogo.
+
+Na página de cada atendimento, registre **Observações da sessão**, **Plano alimentar** e **Orientações e próximos passos**, como texto (até 10.000 caracteres por campo). Os registros podem ser preparados antes da consulta e revisados após a conclusão. Cada salvamento guarda uma versão com autor e data; o histórico das anotações pode ser expandido na página do atendimento. As respostas originais do formulário ficam separadas e são preservadas.
+
+Se dois profissionais abrirem a mesma sessão e tentarem editar, uma gravação com versão desatualizada é recusada. O profissional deve atualizar a página, revisar a versão recebida e salvar novamente, sem sobrescrever silenciosamente as anotações do colega.
+
+Cada envio público cria seu próprio cadastro de paciente. Não há unificação automática por nome ou contato. Para reunir um retorno no histórico de um paciente já cadastrado, abra a consulta e use **Vincular a paciente existente**. Essa ação aceita somente pacientes da mesma conta, mantém a ficha original e as anotações da sessão, e preserva o cadastro anterior. Um novo cadastro também pode ser criado pela área **Pacientes**.
+
+## Histórico compartilhado com a equipe
+
+Todos os nutricionistas autorizados da mesma clínica/conta podem consultar o histórico completo dos pacientes, independentemente de qual profissional realizou a consulta. Também podem registrar sessões, editar contatos e controlar o status dos atendimentos. A conta responsável gerencia quem tem acesso:
+
+1. Crie um usuário individual para cada nutricionista em `/admin/` (ele não precisa ser membro da equipe administrativa ou superusuário para usar a interface).
+2. Entre na conta responsável pela clínica e abra **Equipe**.
+3. Informe o **usuário de acesso do nutricionista** e clique em **Adicionar à equipe**. O acesso é concedido aos dados clínicos dessa conta.
+4. Cada profissional entra com seu próprio login. Agenda, atendimentos e pacientes incluem os dados da própria conta e das contas que foram compartilhadas com ele.
+5. Use **Pausar acesso** para retirar o compartilhamento. As próximas requisições desse usuário não terão acesso aos registros da conta; anotações e autoria existentes são preservadas.
+
+O cadastro de um nutricionista no formulário representa um profissional de atendimento e não cria um login nem concede acesso ao sistema. O vínculo de equipe precisa ser adicionado explicitamente. A configuração dos formulários e a gestão dos membros continuam restritas à conta responsável. Equipes não compartilham dados entre si sem um vínculo autorizado; o admin mantém as permissões próprias de administração.
+
 ## Administração e demonstração
 
-O admin permite gerenciar clientes, consultas, formulários, modelos salvos, nutricionistas, disponibilidades e fichas. As fichas novas com histórico de perguntas e respostas ficam somente para leitura, preservando o registro recebido. Superusuários podem administrar todas as contas; usuários com acesso ao admin e permissões dos modelos ficam limitados aos registros da própria conta. A configuração pela interface não exige acesso ao admin.
+O admin permite gerenciar clientes, consultas, formulários, modelos salvos, nutricionistas, disponibilidades e fichas, além de consultar registros de sessão e alterações de status. As fichas novas com histórico de perguntas e respostas ficam somente para leitura, preservando o registro recebido. Superusuários podem administrar todas as contas; usuários com acesso ao admin e permissões dos modelos ficam limitados aos registros da própria conta. A configuração pela interface não exige acesso ao admin.
 
 Para popular o calendário com os exemplos da primeira versão:
 
@@ -143,6 +181,10 @@ NutriAgenda/
 │   ├── models.py                 # Clientes, profissionais, formulários, slots, consultas e fichas
 │   ├── forms.py                  # Campos e validação de configuração e agendamento
 │   ├── questionarios.py           # Esquema, editor e tipos de pergunta
+│   ├── atendimento_views.py       # Controle de consultas, catálogo e equipe
+│   ├── atendimento_services.py    # Operações clínicas transacionais
+│   ├── atendimento_forms.py       # Validação de consultas e registros
+│   ├── acesso.py                  # Contas compartilhadas por equipe
 │   ├── services.py               # Reserva transacional
 │   ├── admin.py                  # Administração e separação entre contas
 │   ├── views.py                  # Calendário e API de consultas do dia
@@ -153,7 +195,8 @@ NutriAgenda/
 │   ├── static/agenda/            # CSS e JavaScript, sem dependências externas
 │   ├── tests.py
 │   ├── test_formularios.py
-│   └── test_questionarios.py
+│   ├── test_questionarios.py
+│   └── test_atendimentos.py
 ├── docs/                         # Capturas de tela com dados fictícios
 ├── manage.py
 └── requirements.txt
@@ -170,6 +213,10 @@ Todas as imagens usam dados fictícios. Os links mostrados nas capturas são loc
 ![Editor de perguntas](docs/editor-perguntas.png)
 
 ![Modelos salvos](docs/modelos-salvos.png)
+
+![Controle de atendimento](docs/controle-atendimento.png)
+
+![Histórico do paciente](docs/historico-paciente.png)
 
 ![Calendário mensal](docs/calendario.png)
 
@@ -193,7 +240,16 @@ A versão do formulário para celular está em `docs/formulario-paciente-mobile.
 | POST | `/disponibilidades/<id>/situacao/` | Pausar ou ativar um horário |
 | GET / POST | `/agendar/<token>/` | Formulário público |
 | GET | `/agendar/<token>/disponibilidades/?profissional=<id>` | Datas e horários livres |
-| GET | `/agendamentos/<id>/` | Informações privadas do paciente |
+| GET / POST | `/agendamentos/<id>/` | Atendimento e registro privado da sessão |
+| GET | `/atendimentos/` | Lista de consultas com filtros |
+| GET / POST | `/agendamentos/<id>/situacao/<acao>/` | Revisar e confirmar alteração de situação |
+| GET / POST | `/agendamentos/<id>/vincular/` | Vincular consulta a paciente existente |
+| GET | `/clientes/` | Catálogo pesquisável de pacientes |
+| GET / POST | `/clientes/novo/` | Cadastro de paciente |
+| GET | `/clientes/<id>/` | Histórico completo do paciente |
+| GET / POST | `/clientes/<id>/editar/` | Editar contato e nome |
+| GET / POST | `/equipe/` | Membros e compartilhamento da conta |
+| POST | `/equipe/<id>/acesso/` | Pausar ou ativar acesso de um membro |
 | GET / POST | `/entrar/` | Login |
 | POST | `/sair/` | Logout |
 | GET / POST | `/admin/` | Administração Django |
@@ -208,7 +264,7 @@ python manage.py makemigrations --check --dry-run
 python manage.py test
 ```
 
-Os 53 testes cobrem calendário, autenticação, isolamento entre contas, campos e validação, opções dependentes, configuração, horários pausados, cancelamento, rollback, reserva simultânea por dois pacientes, modelos salvos, cópias independentes, perguntas dinâmicas, validação dos tipos de resposta, preservação do histórico e edições concorrentes. O fluxo também foi conferido em Chromium, incluindo as telas para celular.
+Os 69 testes cobrem calendário, autenticação, isolamento entre contas, campos e validação, opções dependentes, configuração, horários pausados, cancelamento, rollback, reserva simultânea por dois pacientes, modelos salvos, cópias independentes, perguntas dinâmicas, validação dos tipos de resposta, preservação do histórico, edições concorrentes, conclusão e cancelamento, liberação de horários, autoria e versões dos registros de sessão, catálogo, vinculação de retornos e acesso compartilhado/revogado por equipe. O fluxo também foi conferido em Chromium, incluindo as telas para celular.
 
 ## Configuração do ambiente
 

@@ -27,6 +27,7 @@
       {% endif %}
     </div>
   </header>
+  {% if user.is_authenticated %}<nav class="workspace-nav" aria-label="Consultório"><a href="{% url 'agenda:calendario' %}">Agenda</a><a href="{% url 'agenda:atendimentos' %}">Atendimentos</a><a href="{% url 'agenda:clientes' %}">Pacientes</a><a href="{% url 'agenda:formularios' %}">Formulários</a><a href="{% url 'agenda:equipe' %}">Equipe</a></nav>{% endif %}
   {% if messages %}<div class="flash-messages" aria-live="polite">{% for message in messages %}<p class="flash-message">{{ message }}</p>{% endfor %}</div>{% endif %}
   {% block content %}{% endblock %}
 </body>
