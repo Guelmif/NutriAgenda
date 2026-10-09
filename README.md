@@ -1,4 +1,4 @@
-# NutriAgenda
+# ClínicaUnopar
 
 Sistema de agendamento nutricional com **Python e Django**. A agenda mensal está integrada a formulários públicos configuráveis: os pacientes escolhem um nutricionista, uma data e um horário disponível e enviam suas informações para o consultório.
 
@@ -28,8 +28,8 @@ Sistema de agendamento nutricional com **Python e Django**. A agenda mensal est�
 Requisitos: Python 3.10 ou superior e Git.
 
 ```bash
-git clone https://github.com/Guelmif/NutriAgenda.git
-cd NutriAgenda
+git clone --branch chore/clinica-unopar-formatacao https://github.com/Guelmif/NutriAgenda.git ClinicaUnopar
+cd ClinicaUnopar
 python -m venv .venv
 ```
 
@@ -60,7 +60,9 @@ Abra **http://127.0.0.1:8000/** e entre com o usuário criado. O painel administ
 Para atualizar uma instalação existente, mantenha o banco local e execute:
 
 ```bash
-git pull origin main
+git fetch origin
+git switch chore/clinica-unopar-formatacao
+git pull --ff-only
 python -m pip install -r requirements.txt
 python manage.py migrate
 ```
@@ -175,7 +177,7 @@ O comando adiciona dez consultas e quatro clientes fictícios, sem criar senhas 
 ## Estrutura
 
 ```text
-NutriAgenda/
+ClinicaUnopar/
 ├── config/                       # Configurações, URLs, ASGI e WSGI
 ├── agenda/
 │   ├── models.py                 # Clientes, profissionais, formulários, slots, consultas e fichas
@@ -265,6 +267,37 @@ python manage.py test
 ```
 
 Os 69 testes cobrem calendário, autenticação, isolamento entre contas, campos e validação, opções dependentes, configuração, horários pausados, cancelamento, rollback, reserva simultânea por dois pacientes, modelos salvos, cópias independentes, perguntas dinâmicas, validação dos tipos de resposta, preservação do histórico, edições concorrentes, conclusão e cancelamento, liberação de horários, autoria e versões dos registros de sessão, catálogo, vinculação de retornos e acesso compartilhado/revogado por equipe. O fluxo também foi conferido em Chromium, incluindo as telas para celular.
+
+## Formatação do projeto
+
+A identidade **ClínicaUnopar** está na branch `chore/clinica-unopar-formatacao`. O código usa quatro espaços para Python e dois espaços para templates Django, JavaScript e CSS. `.editorconfig`, `pyproject.toml` e `.prettierrc.json` registram esse padrão.
+
+Instale as ferramentas de desenvolvimento (separadas das dependências necessárias para executar o sistema):
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Formate Python e os templates:
+
+```bash
+python -m black .
+python -m djlint agenda/templates --reformat
+```
+
+Para JavaScript e CSS, use Node.js apenas como ferramenta de desenvolvimento:
+
+```bash
+npx prettier@3.9.9 --write "agenda/static/agenda/*.js" "agenda/static/agenda/*.css"
+```
+
+Confira a formatação sem editar arquivos:
+
+```bash
+python -m black --check .
+python -m djlint agenda/templates --check
+npx prettier@3.9.9 --check "agenda/static/agenda/*.js" "agenda/static/agenda/*.css"
+```
 
 ## Configuração do ambiente
 

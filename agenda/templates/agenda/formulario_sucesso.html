@@ -1,3 +1,18 @@
-{% extends 'agenda/base.html' %}
-{% block title %}Solicitação recebida · NutriAgenda{% endblock %}
-{% block content %}<main id="conteudo" class="booking-main"><section class="panel success-panel"><span class="success-check" aria-hidden="true">✓</span><p class="eyebrow">TUDO CERTO POR AQUI</p><h1>Solicitação recebida<span class="heading-dot">.</span></h1><p class="subtitle">Seu agendamento foi registrado e está pendente de confirmação pelo consultório.</p><p class="section-description">O consultório poderá entrar em contato pelos dados que você informou.</p><a class="today-button" href="{% url 'agenda:formulario_publico' formulario.token %}">Voltar ao formulário</a></section></main>{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  Solicitação recebida · ClínicaUnopar
+{% endblock %}
+{% block content %}
+  <main id="conteudo" class="booking-main">
+    <section class="panel success-panel">
+      <span class="success-check" aria-hidden="true">✓</span>
+      <p class="eyebrow">TUDO CERTO POR AQUI</p>
+      <h1>Solicitação recebida<span class="heading-dot">.</span></h1>
+      <p class="subtitle">Seu agendamento foi registrado e está pendente de confirmação pelo consultório.</p>
+      <p class="section-description">O consultório poderá entrar em contato pelos dados que você informou.</p>
+      <a class="today-button"
+         href="{% url 'agenda:formulario_publico' formulario.token %}">Voltar ao formulário</a>
+    </section>
+  </main>
+{% endblock %}

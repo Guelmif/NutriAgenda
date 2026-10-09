@@ -105,8 +105,8 @@ abbr[title] {
   letter-spacing: -0.8px;
   color: var(--green);
 }
-.brand > span:last-child {
-  font-weight: 450;
+.brand-name {
+  font-weight: 750;
 }
 .brand-icon {
   display: grid;

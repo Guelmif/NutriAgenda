@@ -1,24 +1,123 @@
-{% extends 'agenda/base.html' %}
-{% block title %}Atendimento · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  Atendimento · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content narrow-content">
-  <a class="back-link" href="{% url 'agenda:atendimentos' %}">← Atendimentos</a>
-  <p class="eyebrow">ACOMPANHAMENTO DO PACIENTE</p><h1>{{ agendamento.cliente.nome }}<span class="heading-dot">.</span></h1>
-  <p class="subtitle">{{ agendamento.data|date:'d/m/Y' }} às {{ agendamento.horario|time:'H:i' }} · {{ agendamento.profissional.nome|default:'Nutricionista não informado' }}</p>
-  <section class="panel"><div class="clinical-heading"><div><span class="appointment-status {{ agendamento.status }}">{{ agendamento.get_status_display }}</span><p class="field-help">Conta: {{ agendamento.cliente.nutricionista.get_full_name|default:agendamento.cliente.nutricionista.username }}</p></div><a class="today-button" href="{% url 'agenda:detalhes_cliente' agendamento.cliente_id %}">Histórico do paciente</a></div>
-    {% if pode_alterar %}<div class="clinical-actions">{% if pode_confirmar %}<a class="today-button" href="{% url 'agenda:situacao_agendamento' agendamento.pk 'confirmar' %}">Confirmar consulta</a>{% endif %}{% if pode_concluir %}<a class="primary-button" href="{% url 'agenda:situacao_agendamento' agendamento.pk 'concluir' %}">Concluir atendimento</a>{% endif %}<a class="today-button danger-button" href="{% url 'agenda:situacao_agendamento' agendamento.pk 'cancelar' %}">Cancelar consulta</a></div>{% if not pode_concluir %}<p class="field-help">A conclusão fica disponível a partir do horário agendado.</p>{% endif %}{% endif %}
-    {% if agendamento.concluido_em %}<p class="field-help">Concluído em {{ agendamento.concluido_em|date:'d/m/Y H:i' }}.</p>{% endif %}
-    {% if agendamento.cancelado_em %}<p class="field-help">Cancelado em {{ agendamento.cancelado_em|date:'d/m/Y H:i' }}.</p>{% endif %}
-    {% if agendamento.motivo_cancelamento %}<p class="session-text"><strong>Motivo do cancelamento:</strong><br>{{ agendamento.motivo_cancelamento|linebreaksbr }}</p>{% endif %}
-  </section>
-  <section class="panel"><p class="eyebrow">REGISTRO PROFISSIONAL</p><h2>Observações e plano alimentar</h2><p class="section-description">Este registro pertence a esta consulta e pode ser consultado pelos nutricionistas autorizados da equipe.</p>
-    {% if agendamento.status == 'cancelado' %}{% if sessao %}{% include 'agenda/registro_sessao.html' %}{% else %}<p class="field-help session-text">Nenhum registro de sessão. A consulta foi cancelada.</p>{% endif %}
-    {% else %}<form method="post" class="editor-form">{% csrf_token %}{% include 'agenda/campos.html' with form=sessao_form %}{% if sessao_form.non_field_errors %}<a class="today-button" href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">Carregar registro atualizado</a>{% endif %}<button class="primary-button" type="submit">Salvar registro da sessão</button></form>{% endif %}
-    {% if sessao %}<p class="field-help session-text">Atualizado em {{ sessao.atualizado_em|date:'d/m/Y H:i' }} por {{ sessao.atualizado_por.get_full_name|default:sessao.atualizado_por.username|default:'Conta removida' }}.</p>{% endif %}
-  </section>
-  {% if revisoes %}<details class="panel"><summary>Histórico das anotações da sessão</summary>{% for revisao in revisoes %}<article class="session-revision"><h3>Registro de {{ revisao.criado_em|date:'d/m/Y H:i' }}</h3><p class="field-help">Por {{ revisao.autor.get_full_name|default:revisao.autor.username|default:'Conta removida' }}</p>{% include 'agenda/registro_sessao.html' with sessao=revisao %}</article>{% endfor %}</details>{% endif %}
-  <details class="panel"><summary>Informações recebidas no agendamento</summary>{% include 'agenda/ficha_recebida.html' %}<p class="field-help session-text">A ficha mantém as informações originais enviadas pelo paciente.</p></details>
-  <section class="panel"><h2>Cadastro do paciente</h2><p class="section-description">Para reunir retornos de um paciente já cadastrado, vincule esta consulta ao cadastro correto da mesma conta.</p><div class="clinical-actions"><a class="today-button" href="{% url 'agenda:editar_cliente' agendamento.cliente_id %}">Editar cadastro</a><a class="text-button" href="{% url 'agenda:vincular_agendamento' agendamento.pk %}">Vincular a paciente existente</a></div></section>
-  {% if historico_status %}<section class="panel"><h2>Histórico da consulta</h2><ul class="professional-list">{% for item in historico_status %}<li><div><strong>{{ item.get_anterior_display }} → {{ item.get_novo_display }}</strong><p class="field-help">{{ item.realizado_em|date:'d/m/Y H:i' }} · {{ item.realizado_por.get_full_name|default:item.realizado_por.username|default:'Conta removida' }}</p>{% if item.motivo %}<p class="session-text">{{ item.motivo|linebreaksbr }}</p>{% endif %}</div></li>{% endfor %}</ul></section>{% endif %}
-</main>
+  <main id="conteudo" class="main-content narrow-content">
+    <a class="back-link" href="{% url 'agenda:atendimentos' %}">← Atendimentos</a>
+    <p class="eyebrow">ACOMPANHAMENTO DO PACIENTE</p>
+    <h1>{{ agendamento.cliente.nome }}<span class="heading-dot">.</span></h1>
+    <p class="subtitle">{{ agendamento.data|date:'d/m/Y' }} às {{ agendamento.horario|time:'H:i' }} · {{ agendamento.profissional.nome|default:'Nutricionista não informado' }}</p>
+    <section class="panel">
+      <div class="clinical-heading">
+        <div>
+          <span class="appointment-status {{ agendamento.status }}">{{ agendamento.get_status_display }}</span>
+          <p class="field-help">Conta: {{ agendamento.cliente.nutricionista.get_full_name|default:agendamento.cliente.nutricionista.username }}</p>
+        </div>
+        <a class="today-button"
+           href="{% url 'agenda:detalhes_cliente' agendamento.cliente_id %}">Histórico do paciente</a>
+      </div>
+      {% if pode_alterar %}
+        <div class="clinical-actions">
+          {% if pode_confirmar %}
+            <a class="today-button"
+               href="{% url 'agenda:situacao_agendamento' agendamento.pk 'confirmar' %}">Confirmar consulta</a>
+          {% endif %}
+          {% if pode_concluir %}
+            <a class="primary-button"
+               href="{% url 'agenda:situacao_agendamento' agendamento.pk 'concluir' %}">Concluir atendimento</a>
+          {% endif %}
+          <a class="today-button danger-button"
+             href="{% url 'agenda:situacao_agendamento' agendamento.pk 'cancelar' %}">Cancelar consulta</a>
+        </div>
+        {% if not pode_concluir %}
+          <p class="field-help">A conclusão fica disponível a partir do horário agendado.</p>
+        {% endif %}
+      {% endif %}
+      {% if agendamento.concluido_em %}
+        <p class="field-help">Concluído em {{ agendamento.concluido_em|date:'d/m/Y H:i' }}.</p>
+      {% endif %}
+      {% if agendamento.cancelado_em %}
+        <p class="field-help">Cancelado em {{ agendamento.cancelado_em|date:'d/m/Y H:i' }}.</p>
+      {% endif %}
+      {% if agendamento.motivo_cancelamento %}
+        <p class="session-text">
+          <strong>Motivo do cancelamento:</strong>
+          <br>
+          {{ agendamento.motivo_cancelamento|linebreaksbr }}
+        </p>
+      {% endif %}
+    </section>
+    <section class="panel">
+      <p class="eyebrow">REGISTRO PROFISSIONAL</p>
+      <h2>Observações e plano alimentar</h2>
+      <p class="section-description">Este registro pertence a esta consulta e pode ser consultado pelos nutricionistas autorizados da equipe.</p>
+      {% if agendamento.status == "cancelado" %}
+        {% if sessao %}
+          {% include "agenda/registro_sessao.html" %}
+        {% else %}
+          <p class="field-help session-text">Nenhum registro de sessão. A consulta foi cancelada.</p>
+        {% endif %}
+      {% else %}
+        <form method="post" class="editor-form">
+          {% csrf_token %}
+          {% include "agenda/campos.html" with form=sessao_form %}
+          {% if sessao_form.non_field_errors %}
+            <a class="today-button"
+               href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">Carregar registro atualizado</a>
+          {% endif %}
+          <button class="primary-button" type="submit">Salvar registro da sessão</button>
+        </form>
+      {% endif %}
+      {% if sessao %}
+        <p class="field-help session-text">Atualizado em {{ sessao.atualizado_em|date:'d/m/Y H:i' }} por {{ sessao.atualizado_por.get_full_name|default:sessao.atualizado_por.username|default:'Conta removida' }}.</p>
+      {% endif %}
+    </section>
+    {% if revisoes %}
+      <details class="panel">
+        <summary>Histórico das anotações da sessão</summary>
+        {% for revisao in revisoes %}
+          <article class="session-revision">
+            <h3>Registro de {{ revisao.criado_em|date:'d/m/Y H:i' }}</h3>
+            <p class="field-help">Por {{ revisao.autor.get_full_name|default:revisao.autor.username|default:'Conta removida' }}</p>
+            {% include "agenda/registro_sessao.html" with sessao=revisao %}
+          </article>
+        {% endfor %}
+      </details>
+    {% endif %}
+    <details class="panel">
+      <summary>Informações recebidas no agendamento</summary>
+      {% include "agenda/ficha_recebida.html" %}
+      <p class="field-help session-text">A ficha mantém as informações originais enviadas pelo paciente.</p>
+    </details>
+    <section class="panel">
+      <h2>Cadastro do paciente</h2>
+      <p class="section-description">Para reunir retornos de um paciente já cadastrado, vincule esta consulta ao cadastro correto da mesma conta.</p>
+      <div class="clinical-actions">
+        <a class="today-button"
+           href="{% url 'agenda:editar_cliente' agendamento.cliente_id %}">Editar cadastro</a>
+        <a class="text-button"
+           href="{% url 'agenda:vincular_agendamento' agendamento.pk %}">Vincular a paciente existente</a>
+      </div>
+    </section>
+    {% if historico_status %}
+      <section class="panel">
+        <h2>Histórico da consulta</h2>
+        <ul class="professional-list">
+          {% for item in historico_status %}
+            <li>
+              <div>
+                <strong>{{ item.get_anterior_display }} → {{ item.get_novo_display }}</strong>
+                <p class="field-help">{{ item.realizado_em|date:'d/m/Y H:i' }} · {{ item.realizado_por.get_full_name|default:item.realizado_por.username|default:'Conta removida' }}</p>
+                {% if item.motivo %}
+                  <p class="session-text">{{ item.motivo|linebreaksbr }}</p>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  </main>
 {% endblock %}

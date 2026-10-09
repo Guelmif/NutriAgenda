@@ -9,67 +9,110 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0002_disponibilidade_agendamento_disponibilidade_and_more'),
+        ("agenda", "0002_disponibilidade_agendamento_disponibilidade_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fichapaciente',
-            name='respostas',
-            field=models.JSONField(blank=True, default=list, verbose_name='perguntas e respostas recebidas'),
+            model_name="fichapaciente",
+            name="respostas",
+            field=models.JSONField(
+                blank=True, default=list, verbose_name="perguntas e respostas recebidas"
+            ),
         ),
         migrations.AddField(
-            model_name='formularioagendamento',
-            name='campos_padrao',
+            model_name="formularioagendamento",
+            name="campos_padrao",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
-            model_name='formularioagendamento',
-            name='perguntas',
+            model_name="formularioagendamento",
+            name="perguntas",
             field=models.JSONField(blank=True, default=list),
         ),
         migrations.AddField(
-            model_name='formularioagendamento',
-            name='versao',
+            model_name="formularioagendamento",
+            name="versao",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='fichapaciente',
-            name='idade',
-            field=models.PositiveSmallIntegerField(blank=True, null=True, validators=[django.core.validators.MaxValueValidator(120)], verbose_name='idade'),
+            model_name="fichapaciente",
+            name="idade",
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                null=True,
+                validators=[django.core.validators.MaxValueValidator(120)],
+                verbose_name="idade",
+            ),
         ),
         migrations.AlterField(
-            model_name='fichapaciente',
-            name='motivo_consulta',
-            field=models.TextField(blank=True, max_length=2000, verbose_name='motivo da consulta'),
+            model_name="fichapaciente",
+            name="motivo_consulta",
+            field=models.TextField(
+                blank=True, max_length=2000, verbose_name="motivo da consulta"
+            ),
         ),
         migrations.AlterField(
-            model_name='fichapaciente',
-            name='tem_problemas_saude',
-            field=models.BooleanField(blank=True, null=True, verbose_name='tem problemas de saúde'),
+            model_name="fichapaciente",
+            name="tem_problemas_saude",
+            field=models.BooleanField(
+                blank=True, null=True, verbose_name="tem problemas de saúde"
+            ),
         ),
         migrations.AlterField(
-            model_name='fichapaciente',
-            name='usa_medicacoes',
-            field=models.BooleanField(blank=True, null=True, verbose_name='usa medicações'),
+            model_name="fichapaciente",
+            name="usa_medicacoes",
+            field=models.BooleanField(
+                blank=True, null=True, verbose_name="usa medicações"
+            ),
         ),
         migrations.CreateModel(
-            name='ModeloFormulario',
+            name="ModeloFormulario",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nome', models.CharField(max_length=150, verbose_name='nome do modelo')),
-                ('titulo', models.CharField(max_length=150, verbose_name='título do formulário')),
-                ('descricao', models.TextField(blank=True, max_length=2000, verbose_name='mensagem de apresentação')),
-                ('campos_padrao', models.JSONField(blank=True, default=dict)),
-                ('perguntas', models.JSONField(blank=True, default=list)),
-                ('versao', models.PositiveIntegerField(default=1)),
-                ('responsavel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='modelos_formulario', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "nome",
+                    models.CharField(max_length=150, verbose_name="nome do modelo"),
+                ),
+                (
+                    "titulo",
+                    models.CharField(
+                        max_length=150, verbose_name="título do formulário"
+                    ),
+                ),
+                (
+                    "descricao",
+                    models.TextField(
+                        blank=True,
+                        max_length=2000,
+                        verbose_name="mensagem de apresentação",
+                    ),
+                ),
+                ("campos_padrao", models.JSONField(blank=True, default=dict)),
+                ("perguntas", models.JSONField(blank=True, default=list)),
+                ("versao", models.PositiveIntegerField(default=1)),
+                (
+                    "responsavel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="modelos_formulario",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'modelo de formulário',
-                'verbose_name_plural': 'modelos de formulário',
-                'ordering': ['nome', 'pk'],
+                "verbose_name": "modelo de formulário",
+                "verbose_name_plural": "modelos de formulário",
+                "ordering": ["nome", "pk"],
             },
         ),
     ]

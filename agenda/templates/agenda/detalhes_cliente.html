@@ -1,7 +1,50 @@
-{% extends 'agenda/base.html' %}
-{% block title %}{{ cliente.nome }} · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  {{ cliente.nome }}
+  · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content"><a class="back-link" href="{% url 'agenda:clientes' %}">← Pacientes</a><section class="page-heading"><div><p class="eyebrow">HISTÓRICO DO PACIENTE</p><h1>{{ cliente.nome }}<span class="heading-dot">.</span></h1><p class="subtitle">{{ cliente.email|default:'E-mail não informado' }} · {{ cliente.telefone|default:'Telefone não informado' }}</p><p class="field-help">Conta: {{ cliente.nutricionista.get_full_name|default:cliente.nutricionista.username }}</p></div><a class="today-button" href="{% url 'agenda:editar_cliente' cliente.pk %}">Editar cadastro</a></section><p class="field-help">{{ page.paginator.count }} consulta{{ page.paginator.count|pluralize:'s' }} no histórico. As informações são compartilhadas com os nutricionistas autorizados desta conta.</p>
-{% for item in page %}<article class="panel"><div class="clinical-heading"><div><span class="appointment-status {{ item.status }}">{{ item.get_status_display }}</span><h2>{{ item.data|date:'d/m/Y' }} às {{ item.horario|time:'H:i' }}</h2><p class="subtitle">{{ item.profissional.nome|default:'Nutricionista não informado' }}</p></div><a class="today-button" href="{% url 'agenda:detalhes_agendamento' item.pk %}">Abrir atendimento</a></div>{% if item.sessao %}{% include 'agenda/registro_sessao.html' with sessao=item.sessao %}<p class="field-help session-text">Atualizado em {{ item.sessao.atualizado_em|date:'d/m/Y H:i' }} por {{ item.sessao.atualizado_por.get_full_name|default:item.sessao.atualizado_por.username|default:'Conta removida' }}.</p>{% else %}<p class="field-help session-text">Nenhuma anotação registrada para esta consulta.</p>{% endif %}{% if item.motivo_cancelamento %}<p class="session-text">Cancelamento: {{ item.motivo_cancelamento|linebreaksbr }}</p>{% endif %}</article>{% empty %}<div class="panel empty-state"><strong>Nenhuma consulta neste cadastro</strong><p>Você pode vincular consultas recebidas a este paciente pela página do atendimento.</p></div>{% endfor %}{% include 'agenda/paginacao.html' %}
-</main>
+  <main id="conteudo" class="main-content">
+    <a class="back-link" href="{% url 'agenda:clientes' %}">← Pacientes</a>
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">HISTÓRICO DO PACIENTE</p>
+        <h1>{{ cliente.nome }}<span class="heading-dot">.</span></h1>
+        <p class="subtitle">{{ cliente.email|default:'E-mail não informado' }} · {{ cliente.telefone|default:'Telefone não informado' }}</p>
+        <p class="field-help">Conta: {{ cliente.nutricionista.get_full_name|default:cliente.nutricionista.username }}</p>
+      </div>
+      <a class="today-button"
+         href="{% url 'agenda:editar_cliente' cliente.pk %}">Editar cadastro</a>
+    </section>
+    <p class="field-help">{{ page.paginator.count }} consulta{{ page.paginator.count|pluralize:'s' }} no histórico. As informações são compartilhadas com os nutricionistas autorizados desta conta.</p>
+    {% for item in page %}
+      <article class="panel">
+        <div class="clinical-heading">
+          <div>
+            <span class="appointment-status {{ item.status }}">{{ item.get_status_display }}</span>
+            <h2>{{ item.data|date:'d/m/Y' }} às {{ item.horario|time:'H:i' }}</h2>
+            <p class="subtitle">{{ item.profissional.nome|default:'Nutricionista não informado' }}</p>
+          </div>
+          <a class="today-button"
+             href="{% url 'agenda:detalhes_agendamento' item.pk %}">Abrir atendimento</a>
+        </div>
+        {% if item.sessao %}
+          {% include "agenda/registro_sessao.html" with sessao=item.sessao %}
+          <p class="field-help session-text">Atualizado em {{ item.sessao.atualizado_em|date:'d/m/Y H:i' }} por {{ item.sessao.atualizado_por.get_full_name|default:item.sessao.atualizado_por.username|default:'Conta removida' }}.</p>
+        {% else %}
+          <p class="field-help session-text">Nenhuma anotação registrada para esta consulta.</p>
+        {% endif %}
+        {% if item.motivo_cancelamento %}
+          <p class="session-text">Cancelamento: {{ item.motivo_cancelamento|linebreaksbr }}</p>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="panel empty-state">
+        <strong>Nenhuma consulta neste cadastro</strong>
+        <p>Você pode vincular consultas recebidas a este paciente pela página do atendimento.</p>
+      </div>
+    {% endfor %}
+    {% include "agenda/paginacao.html" %}
+  </main>
 {% endblock %}

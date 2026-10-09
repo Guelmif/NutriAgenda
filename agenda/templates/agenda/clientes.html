@@ -1,6 +1,47 @@
-{% extends 'agenda/base.html' %}
-{% block title %}Pacientes · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  Pacientes · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content"><section class="page-heading"><div><p class="eyebrow">HISTÓRICO E ACOMPANHAMENTO</p><h1>Pacientes<span class="heading-dot">.</span></h1><p class="subtitle">Consulte as sessões, observações e planos alimentares dos pacientes da sua equipe.</p></div><a class="primary-button" href="{% url 'agenda:criar_cliente' %}">+ Cadastrar paciente</a></section><form method="get" class="panel clinical-filters patient-search"><div class="form-field"><label for="search">Paciente ou contato</label><input id="search" name="q" value="{{ q }}" placeholder="Buscar por nome, e-mail ou telefone"></div><button class="primary-button" type="submit">Buscar</button></form><p class="field-help session-text">{{ page.paginator.count }} paciente{{ page.paginator.count|pluralize:'s' }} encontrado{{ page.paginator.count|pluralize:'s' }}.</p>
-<div class="form-list">{% for item in page %}<article class="panel form-list-item"><div><h2>{{ item.nome }}</h2><p class="subtitle">{{ item.email|default:item.telefone|default:'Contato não informado' }}</p><p class="field-help">{{ item.total_consultas }} consulta{{ item.total_consultas|pluralize:'s' }} · {{ item.total_concluidas }} concluída{{ item.total_concluidas|pluralize:'s' }} · Conta: {{ item.nutricionista.get_full_name|default:item.nutricionista.username }}</p></div><a class="today-button" href="{% url 'agenda:detalhes_cliente' item.pk %}">Abrir histórico</a></article>{% empty %}<div class="panel empty-state"><strong>Nenhum paciente encontrado</strong><p>Cadastre um paciente ou receba uma reserva pelo formulário.</p></div>{% endfor %}</div>{% include 'agenda/paginacao.html' %}</main>
+  <main id="conteudo" class="main-content">
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">HISTÓRICO E ACOMPANHAMENTO</p>
+        <h1>Pacientes<span class="heading-dot">.</span></h1>
+        <p class="subtitle">Consulte as sessões, observações e planos alimentares dos pacientes da sua equipe.</p>
+      </div>
+      <a class="primary-button" href="{% url 'agenda:criar_cliente' %}">+ Cadastrar paciente</a>
+    </section>
+    <form method="get" class="panel clinical-filters patient-search">
+      <div class="form-field">
+        <label for="search">Paciente ou contato</label>
+        <input id="search"
+               name="q"
+               value="{{ q }}"
+               placeholder="Buscar por nome, e-mail ou telefone">
+      </div>
+      <button class="primary-button" type="submit">Buscar</button>
+    </form>
+    <p class="field-help session-text">{{ page.paginator.count }} paciente{{ page.paginator.count|pluralize:'s' }} encontrado{{ page.paginator.count|pluralize:'s' }}.</p>
+    <div class="form-list">
+      {% for item in page %}
+        <article class="panel form-list-item">
+          <div>
+            <h2>{{ item.nome }}</h2>
+            <p class="subtitle">{{ item.email|default:item.telefone|default:'Contato não informado' }}</p>
+            <p class="field-help">{{ item.total_consultas }} consulta{{ item.total_consultas|pluralize:'s' }} · {{ item.total_concluidas }} concluída{{ item.total_concluidas|pluralize:'s' }} · Conta: {{ item.nutricionista.get_full_name|default:item.nutricionista.username }}</p>
+          </div>
+          <a class="today-button"
+             href="{% url 'agenda:detalhes_cliente' item.pk %}">Abrir histórico</a>
+        </article>
+      {% empty %}
+        <div class="panel empty-state">
+          <strong>Nenhum paciente encontrado</strong>
+          <p>Cadastre um paciente ou receba uma reserva pelo formulário.</p>
+        </div>
+      {% endfor %}
+    </div>
+    {% include "agenda/paginacao.html" %}
+  </main>
 {% endblock %}

@@ -1,1 +1,14 @@
-<dl class="session-details"><dt>Observações da sessão</dt><dd>{{ sessao.observacoes|default:'Não informado'|linebreaksbr }}</dd><dt>Plano alimentar</dt><dd>{{ sessao.plano_alimentar|default:'Não informado'|linebreaksbr }}</dd><dt>Orientações e próximos passos</dt><dd>{{ sessao.orientacoes|default:'Não informado'|linebreaksbr }}</dd></dl>
+<dl class="session-details">
+  <dt>Observações da sessão</dt>
+  <dd>
+    {{ sessao.observacoes|default:'Não informado'|linebreaksbr }}
+  </dd>
+  <dt>Plano alimentar</dt>
+  <dd>
+    {{ sessao.plano_alimentar|default:'Não informado'|linebreaksbr }}
+  </dd>
+  <dt>Orientações e próximos passos</dt>
+  <dd>
+    {{ sessao.orientacoes|default:'Não informado'|linebreaksbr }}
+  </dd>
+</dl>

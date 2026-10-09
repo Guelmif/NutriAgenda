@@ -1,5 +1,58 @@
-{% extends 'agenda/base.html' %}
-{% block title %}Equipe · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  Equipe · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content"><p class="eyebrow">CONSULTÓRIO COMPARTILHADO</p><h1>Minha equipe<span class="heading-dot">.</span></h1><p class="subtitle">Os nutricionistas autorizados podem consultar todo o histórico desta conta, registrar sessões e controlar consultas.</p><div class="configuration-grid"><section class="panel"><h2>Nutricionistas com acesso à minha conta</h2><ul class="professional-list">{% for item in membros %}<li><div><strong>{{ item.usuario.get_full_name|default:item.usuario.username }}</strong><p class="field-help">{{ item.usuario.username }} · {% if not item.usuario.is_active %}Usuário inativo{% elif item.ativo %}Acesso ativo{% else %}Acesso pausado{% endif %}</p></div><form method="post" action="{% url 'agenda:alterar_membro' item.pk %}">{% csrf_token %}<input type="hidden" name="acao" value="{% if item.ativo %}desativar{% else %}ativar{% endif %}"><button class="text-button" type="submit">{% if item.ativo %}Pausar acesso{% else %}Ativar acesso{% endif %}</button></form></li>{% empty %}<li><p class="field-help">Sua conta ainda não está compartilhada.</p></li>{% endfor %}</ul><form method="post" class="editor-form">{% csrf_token %}{% include 'agenda/campos.html' %}<button class="primary-button" type="submit">Adicionar à equipe</button></form><p class="field-help session-text">O usuário precisa ter um login próprio. O cadastro de um profissional no formulário não cria esse login automaticamente.</p></section><section class="panel"><h2>Contas compartilhadas comigo</h2><ul class="professional-list">{% for item in compartilhadas %}<li><strong>{{ item.responsavel.get_full_name|default:item.responsavel.username }}</strong></li>{% empty %}<li><p class="field-help">Nenhuma outra conta compartilhou o histórico com você.</p></li>{% endfor %}</ul><p class="section-description">O catálogo, os atendimentos e o calendário incluem a sua conta e as contas compartilhadas com você. A configuração de formulários e da equipe continua com a conta responsável.</p></section></div></main>
+  <main id="conteudo" class="main-content">
+    <p class="eyebrow">CONSULTÓRIO COMPARTILHADO</p>
+    <h1>Minha equipe<span class="heading-dot">.</span></h1>
+    <p class="subtitle">Os nutricionistas autorizados podem consultar todo o histórico desta conta, registrar sessões e controlar consultas.</p>
+    <div class="configuration-grid">
+      <section class="panel">
+        <h2>Nutricionistas com acesso à minha conta</h2>
+        <ul class="professional-list">
+          {% for item in membros %}
+            <li>
+              <div>
+                <strong>{{ item.usuario.get_full_name|default:item.usuario.username }}</strong>
+                <p class="field-help">{{ item.usuario.username }} · {% if not item.usuario.is_active %}Usuário inativo{% elif item.ativo %}Acesso ativo{% else %}Acesso pausado{% endif %}</p>
+              </div>
+              <form method="post" action="{% url 'agenda:alterar_membro' item.pk %}">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="acao"
+                       value="{% if item.ativo %}desativar{% else %}ativar{% endif %}"><button class="text-button" type="submit">{% if item.ativo %}Pausar acesso{% else %}Ativar acesso{% endif %}</button>
+              </form>
+            </li>
+          {% empty %}
+            <li>
+              <p class="field-help">Sua conta ainda não está compartilhada.</p>
+            </li>
+          {% endfor %}
+        </ul>
+        <form method="post" class="editor-form">
+          {% csrf_token %}
+          {% include "agenda/campos.html" %}
+          <button class="primary-button" type="submit">Adicionar à equipe</button>
+        </form>
+        <p class="field-help session-text">O usuário precisa ter um login próprio. O cadastro de um profissional no formulário não cria esse login automaticamente.</p>
+      </section>
+      <section class="panel">
+        <h2>Contas compartilhadas comigo</h2>
+        <ul class="professional-list">
+          {% for item in compartilhadas %}
+            <li>
+              <strong>{{ item.responsavel.get_full_name|default:item.responsavel.username }}</strong>
+            </li>
+          {% empty %}
+            <li>
+              <p class="field-help">Nenhuma outra conta compartilhou o histórico com você.</p>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="section-description">O catálogo, os atendimentos e o calendário incluem a sua conta e as contas compartilhadas com você. A configuração de formulários e da equipe continua com a conta responsável.</p>
+      </section>
+    </div>
+  </main>
 {% endblock %}

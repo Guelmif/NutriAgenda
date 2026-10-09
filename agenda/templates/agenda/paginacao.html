@@ -1,1 +1,13 @@
-{% if page.has_other_pages %}<nav class="clinical-pagination" aria-label="Navegação de páginas">{% if page.has_previous %}<a class="today-button" href="?page={{ page.previous_page_number }}&amp;q={{ q|urlencode }}&amp;status={{ status|urlencode }}&amp;profissional={{ profissional|urlencode }}">← Anterior</a>{% endif %}<span class="field-help">Página {{ page.number }} de {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="today-button" href="?page={{ page.next_page_number }}&amp;q={{ q|urlencode }}&amp;status={{ status|urlencode }}&amp;profissional={{ profissional|urlencode }}">Próxima →</a>{% endif %}</nav>{% endif %}
+{% if page.has_other_pages %}
+  <nav class="clinical-pagination" aria-label="Navegação de páginas">
+    {% if page.has_previous %}
+      <a class="today-button"
+         href="?page={{ page.previous_page_number }}&amp;q={{ q|urlencode }}&amp;status={{ status|urlencode }}&amp;profissional={{ profissional|urlencode }}">← Anterior</a>
+    {% endif %}
+    <span class="field-help">Página {{ page.number }} de {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+      <a class="today-button"
+         href="?page={{ page.next_page_number }}&amp;q={{ q|urlencode }}&amp;status={{ status|urlencode }}&amp;profissional={{ profissional|urlencode }}">Próxima →</a>
+    {% endif %}
+  </nav>
+{% endif %}

@@ -1,5 +1,19 @@
-{% extends 'agenda/base.html' %}
-{% block title %}Salvar modelo · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  Salvar modelo · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content narrow-content"><a class="back-link" href="{% url 'agenda:editar_formulario' formulario.token %}">← Configurar formulário</a><p class="eyebrow">PARA OS PRÓXIMOS ATENDIMENTOS</p><h1>Salvar como modelo<span class="heading-dot">.</span></h1><p class="subtitle">Salve a apresentação e as perguntas de “{{ formulario.titulo }}” para reutilizar. As respostas dos pacientes e os dias e horários não fazem parte do modelo.</p><form method="post" class="panel editor-form">{% csrf_token %}{% include 'agenda/campos.html' %}<button class="primary-button" type="submit">Salvar modelo</button></form></main>
+  <main id="conteudo" class="main-content narrow-content">
+    <a class="back-link"
+       href="{% url 'agenda:editar_formulario' formulario.token %}">← Configurar formulário</a>
+    <p class="eyebrow">PARA OS PRÓXIMOS ATENDIMENTOS</p>
+    <h1>Salvar como modelo<span class="heading-dot">.</span></h1>
+    <p class="subtitle">Salve a apresentação e as perguntas de “{{ formulario.titulo }}” para reutilizar. As respostas dos pacientes e os dias e horários não fazem parte do modelo.</p>
+    <form method="post" class="panel editor-form">
+      {% csrf_token %}
+      {% include "agenda/campos.html" %}
+      <button class="primary-button" type="submit">Salvar modelo</button>
+    </form>
+  </main>
 {% endblock %}

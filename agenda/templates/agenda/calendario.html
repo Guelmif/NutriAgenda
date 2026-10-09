@@ -1,76 +1,151 @@
-{% extends 'agenda/base.html' %}
+{% extends "agenda/base.html" %}
+
 {% load static %}
-{% block title %}Minha agenda · NutriAgenda{% endblock %}
-{% block scripts %}<script src="{% static 'agenda/calendario.js' %}" defer></script>{% endblock %}
+
+{% block title %}
+  Minha agenda · ClínicaUnopar
+{% endblock %}
+{% block scripts %}
+  <script src="{% static 'agenda/calendario.js' %}" defer></script>
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content">
-  <section class="page-heading" aria-labelledby="page-title">
-    <div>
-      <p class="eyebrow">SEU CONSULTÓRIO, ORGANIZADO</p>
-      <h1 id="page-title">Minha agenda<span class="heading-dot">.</span></h1>
-      <p class="subtitle">Mais clareza na rotina. Mais tempo para cuidar.</p>
-    </div>
-    <div class="form-action">
-      <a class="primary-button" href="{% url 'agenda:criar_formulario' %}">
-        <span aria-hidden="true">+</span> Criar formulário
-      </a>
-      <a class="text-button" href="{% url 'agenda:formularios' %}">Meus formulários</a>
-    </div>
-  </section>
-
-  <section class="calendar-card" aria-labelledby="month-title">
-    <div class="calendar-toolbar">
-      <div class="calendar-heading"><span class="section-icon" aria-hidden="true">▦</span><h2>Calendário</h2></div>
-      <nav class="month-navigation" aria-label="Navegação entre meses">
-        {% if anterior %}<a class="icon-button" href="?ano={{ anterior.0 }}&amp;mes={{ anterior.1 }}" aria-label="Mês anterior">‹</a>{% else %}<button class="icon-button" disabled aria-label="Mês anterior">‹</button>{% endif %}
-        <h3 id="month-title">{{ mes_nome }} <span>{{ ano }}</span></h3>
-        {% if proximo %}<a class="icon-button" href="?ano={{ proximo.0 }}&amp;mes={{ proximo.1 }}" aria-label="Próximo mês">›</a>{% else %}<button class="icon-button" disabled aria-label="Próximo mês">›</button>{% endif %}
-      </nav>
-      <a class="today-button" href="{% url 'agenda:calendario' %}">Hoje</a>
-    </div>
-    <div class="month-summary">
-      <p><strong>{{ total }}</strong> agendamento{{ total|pluralize:"s" }} neste mês</p>
-      <div class="legend" aria-label="Legenda dos agendamentos">
-        <span><i class="status-dot confirmado" aria-hidden="true"></i>Confirmado <b>{{ confirmados }}</b></span>
-        <span><i class="status-dot pendente" aria-hidden="true"></i>Pendente <b>{{ pendentes }}</b></span>
-        <span><i class="status-dot concluido" aria-hidden="true"></i>Concluído <b>{{ concluidos }}</b></span>
-        <span><i class="status-dot cancelado" aria-hidden="true"></i>Cancelado</span>
+  <main id="conteudo" class="main-content">
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">SEU CONSULTÓRIO, ORGANIZADO</p>
+        <h1 id="page-title">Minha agenda<span class="heading-dot">.</span></h1>
+        <p class="subtitle">Mais clareza na rotina. Mais tempo para cuidar.</p>
       </div>
+      <div class="form-action">
+        <a class="primary-button" href="{% url 'agenda:criar_formulario' %}">
+          <span aria-hidden="true">+</span> Criar formulário
+        </a>
+        <a class="text-button" href="{% url 'agenda:formularios' %}">Meus formulários</a>
+      </div>
+    </section>
+    <section class="calendar-card" aria-labelledby="month-title">
+      <div class="calendar-toolbar">
+        <div class="calendar-heading">
+          <span class="section-icon" aria-hidden="true">▦</span>
+          <h2>Calendário</h2>
+        </div>
+        <nav class="month-navigation" aria-label="Navegação entre meses">
+          {% if anterior %}
+            <a class="icon-button"
+               href="?ano={{ anterior.0 }}&amp;mes={{ anterior.1 }}"
+               aria-label="Mês anterior">‹</a>
+          {% else %}
+            <button class="icon-button" disabled aria-label="Mês anterior">‹</button>
+          {% endif %}
+          <h3 id="month-title">{{ mes_nome }} <span>{{ ano }}</span></h3>
+          {% if proximo %}
+            <a class="icon-button"
+               href="?ano={{ proximo.0 }}&amp;mes={{ proximo.1 }}"
+               aria-label="Próximo mês">›</a>
+          {% else %}
+            <button class="icon-button" disabled aria-label="Próximo mês">›</button>
+          {% endif %}
+        </nav>
+        <a class="today-button" href="{% url 'agenda:calendario' %}">Hoje</a>
+      </div>
+      <div class="month-summary">
+        <p><strong>{{ total }}</strong> agendamento{{ total|pluralize:"s" }} neste mês</p>
+        <div class="legend" aria-label="Legenda dos agendamentos">
+          <span><i class="status-dot confirmado"
+   aria-hidden="true"></i>Confirmado <b>{{ confirmados }}</b></span>
+          <span><i class="status-dot pendente"
+   aria-hidden="true"></i>Pendente <b>{{ pendentes }}</b></span>
+          <span><i class="status-dot concluido"
+   aria-hidden="true"></i>Concluído <b>{{ concluidos }}</b></span>
+          <span><i class="status-dot cancelado" aria-hidden="true"></i>Cancelado</span>
+        </div>
+      </div>
+      <div class="calendar-scroll">
+        <table class="calendar-table">
+          <caption class="sr-only">{{ mes_nome }} de {{ ano }}. Selecione um dia para ver seus agendamentos.</caption>
+          <thead>
+            <tr>
+              <th scope="col">
+                <abbr title="Domingo">DOM</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Segunda-feira">SEG</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Terça-feira">TER</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Quarta-feira">QUA</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Quinta-feira">QUI</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Sexta-feira">SEX</abbr>
+              </th>
+              <th scope="col">
+                <abbr title="Sábado">SÁB</abbr>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for semana in semanas %}
+              <tr>
+                {% for dia in semana %}
+                  <td {% if not dia %} class="empty-day"{% elif dia.hoje %} class="today-cell"{% endif %}>
+                    {% if dia %}
+                      <button type="button"
+                              class="day-button"
+                              data-date="{{ dia.data }}"
+                              aria-haspopup="dialog"
+                              {% if dia.hoje %} aria-current="date"{% endif %}
+                              aria-label="{{ dia.numero }} de {{ mes_nome }} de {{ ano }}{% if dia.hoje %}, hoje{% endif %}, {{ dia.total }} agendamento{{ dia.total|pluralize:'s' }}">
+                        <span class="day-top"><span class="day-number{% if dia.hoje %} is-today{% endif %}">{{ dia.numero }}</span>{% if dia.total %}<span class="day-count">{{ dia.total }}<span class="sr-only"> agendamentos</span></span>{% endif %}</span>
+                        <span class="day-events">
+                          {% for agendamento in dia.agendamentos %}<span class="event-preview {{ agendamento.status }}"><span class="event-time">{{ agendamento.horario|time:'H:i' }}</span><span class="event-name">{{ agendamento.cliente.nome }}</span></span>{% endfor %}
+                          {% if dia.extras %}<span class="more-events">+{{ dia.extras }} agendamento{{ dia.extras|pluralize:'s' }}</span>{% endif %}
+                        </span>
+                      </button>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="calendar-footer">
+        <span class="info-icon" aria-hidden="true">i</span>
+        <p>Clique em um dia para ver os agendamentos.</p>
+        <span class="today-legend"><i aria-hidden="true"></i>Hoje</span>
+      </div>
+    </section>
+    <p class="page-footer">Um espaço para organizar sua rotina e cuidar de cada encontro.</p>
+    <noscript>
+      <p class="error-message">Ative o JavaScript para abrir os agendamentos de cada dia.</p>
+    </noscript>
+  </main>
+  <dialog id="day-dialog"
+          class="day-dialog"
+          aria-labelledby="dialog-title"
+          data-endpoint="{% url 'agenda:agendamentos_do_dia' %}">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">AGENDA DO DIA</p>
+        <h2 id="dialog-title">Agendamentos</h2>
+        <p id="dialog-weekday" class="subtitle"></p>
+      </div>
+      <button id="close-dialog"
+              type="button"
+              class="icon-button close-button"
+              aria-label="Fechar agendamentos">×</button>
     </div>
-    <div class="calendar-scroll">
-      <table class="calendar-table">
-        <caption class="sr-only">{{ mes_nome }} de {{ ano }}. Selecione um dia para ver seus agendamentos.</caption>
-        <thead><tr><th scope="col"><abbr title="Domingo">DOM</abbr></th><th scope="col"><abbr title="Segunda-feira">SEG</abbr></th><th scope="col"><abbr title="Terça-feira">TER</abbr></th><th scope="col"><abbr title="Quarta-feira">QUA</abbr></th><th scope="col"><abbr title="Quinta-feira">QUI</abbr></th><th scope="col"><abbr title="Sexta-feira">SEX</abbr></th><th scope="col"><abbr title="Sábado">SÁB</abbr></th></tr></thead>
-        <tbody>
-        {% for semana in semanas %}
-          <tr>
-          {% for dia in semana %}
-            <td{% if not dia %} class="empty-day"{% elif dia.hoje %} class="today-cell"{% endif %}>
-              {% if dia %}
-              <button type="button" class="day-button" data-date="{{ dia.data }}" aria-haspopup="dialog"{% if dia.hoje %} aria-current="date"{% endif %} aria-label="{{ dia.numero }} de {{ mes_nome }} de {{ ano }}{% if dia.hoje %}, hoje{% endif %}, {{ dia.total }} agendamento{{ dia.total|pluralize:'s' }}">
-                <span class="day-top"><span class="day-number{% if dia.hoje %} is-today{% endif %}">{{ dia.numero }}</span>{% if dia.total %}<span class="day-count">{{ dia.total }}<span class="sr-only"> agendamentos</span></span>{% endif %}</span>
-                <span class="day-events">
-                  {% for agendamento in dia.agendamentos %}<span class="event-preview {{ agendamento.status }}"><span class="event-time">{{ agendamento.horario|time:'H:i' }}</span><span class="event-name">{{ agendamento.cliente.nome }}</span></span>{% endfor %}
-                  {% if dia.extras %}<span class="more-events">+{{ dia.extras }} agendamento{{ dia.extras|pluralize:'s' }}</span>{% endif %}
-                </span>
-              </button>
-              {% endif %}
-            </td>
-          {% endfor %}
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+    <div id="dialog-content"
+         class="dialog-content"
+         aria-live="polite"
+         aria-atomic="true"></div>
+    <div class="dialog-footer">
+      <button type="button" id="done-dialog" class="today-button">Fechar</button>
     </div>
-    <div class="calendar-footer"><span class="info-icon" aria-hidden="true">i</span><p>Clique em um dia para ver os agendamentos.</p><span class="today-legend"><i aria-hidden="true"></i>Hoje</span></div>
-  </section>
-  <p class="page-footer">Um espaço para organizar sua rotina e cuidar de cada encontro.</p>
-  <noscript><p class="error-message">Ative o JavaScript para abrir os agendamentos de cada dia.</p></noscript>
-</main>
-
-<dialog id="day-dialog" class="day-dialog" aria-labelledby="dialog-title" data-endpoint="{% url 'agenda:agendamentos_do_dia' %}">
-  <div class="dialog-heading"><div><p class="eyebrow">AGENDA DO DIA</p><h2 id="dialog-title">Agendamentos</h2><p id="dialog-weekday" class="subtitle"></p></div><button id="close-dialog" type="button" class="icon-button close-button" aria-label="Fechar agendamentos">×</button></div>
-  <div id="dialog-content" class="dialog-content" aria-live="polite" aria-atomic="true"></div>
-  <div class="dialog-footer"><button type="button" id="done-dialog" class="today-button">Fechar</button></div>
-</dialog>
+  </dialog>
 {% endblock %}

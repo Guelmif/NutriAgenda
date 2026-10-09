@@ -1,34 +1,56 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#166b50">
-  <title>{% block title %}NutriAgenda{% endblock %}</title>
-  <link rel="icon" href="{% static 'agenda/favicon.svg' %}" type="image/svg+xml">
-  <link rel="stylesheet" href="{% static 'agenda/agenda.css' %}">
-  <link rel="stylesheet" href="{% static 'agenda/formularios.css' %}">
-  {% block scripts %}{% endblock %}
-</head>
-<body>
-  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="brand" href="{% url 'agenda:calendario' %}" aria-label="NutriAgenda, página inicial">
-        <span class="brand-icon" aria-hidden="true">{% include 'agenda/leaf.svg' %}</span>
-        Nutri<span>Agenda</span>
-      </a>
-      {% if user.is_authenticated %}
-      <div class="account">
-        <span class="account-name">{{ user.get_full_name|default:user.username }}</span>
-        <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button class="text-button" type="submit">Sair</button></form>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#166b50">
+    <title>{% block title %}ClínicaUnopar{% endblock %}</title>
+    <link rel="icon"
+          href="{% static 'agenda/favicon.svg' %}"
+          type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'agenda/agenda.css' %}">
+    <link rel="stylesheet" href="{% static 'agenda/formularios.css' %}">
+    {% block scripts %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand"
+           href="{% url 'agenda:calendario' %}"
+           aria-label="ClínicaUnopar, página inicial">
+          <span class="brand-icon" aria-hidden="true">{% include "agenda/leaf.svg" %}</span>
+          <span class="brand-name">ClínicaUnopar</span>
+        </a>
+        {% if user.is_authenticated %}
+          <div class="account">
+            <span class="account-name">{{ user.get_full_name|default:user.username }}</span>
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button class="text-button" type="submit">Sair</button>
+            </form>
+          </div>
+        {% endif %}
       </div>
-      {% endif %}
-    </div>
-  </header>
-  {% if user.is_authenticated %}<nav class="workspace-nav" aria-label="Consultório"><a href="{% url 'agenda:calendario' %}">Agenda</a><a href="{% url 'agenda:atendimentos' %}">Atendimentos</a><a href="{% url 'agenda:clientes' %}">Pacientes</a><a href="{% url 'agenda:formularios' %}">Formulários</a><a href="{% url 'agenda:equipe' %}">Equipe</a></nav>{% endif %}
-  {% if messages %}<div class="flash-messages" aria-live="polite">{% for message in messages %}<p class="flash-message">{{ message }}</p>{% endfor %}</div>{% endif %}
-  {% block content %}{% endblock %}
-</body>
+    </header>
+    {% if user.is_authenticated %}
+      <nav class="workspace-nav" aria-label="Consultório">
+        <a href="{% url 'agenda:calendario' %}">Agenda</a>
+        <a href="{% url 'agenda:atendimentos' %}">Atendimentos</a>
+        <a href="{% url 'agenda:clientes' %}">Pacientes</a>
+        <a href="{% url 'agenda:formularios' %}">Formulários</a>
+        <a href="{% url 'agenda:equipe' %}">Equipe</a>
+      </nav>
+    {% endif %}
+    {% if messages %}
+      <div class="flash-messages" aria-live="polite">
+        {% for message in messages %}
+          <p class="flash-message">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </body>
 </html>

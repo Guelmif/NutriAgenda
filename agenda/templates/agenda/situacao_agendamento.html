@@ -1,5 +1,31 @@
-{% extends 'agenda/base.html' %}
-{% block title %}{{ titulo }} · NutriAgenda{% endblock %}
+{% extends "agenda/base.html" %}
+
+{% block title %}
+  {{ titulo }}
+  · ClínicaUnopar
+{% endblock %}
 {% block content %}
-<main id="conteudo" class="main-content narrow-content"><a class="back-link" href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">← Atendimento</a><p class="eyebrow">CONTROLE DE CONSULTAS</p><h1>{{ titulo }}<span class="heading-dot">.</span></h1><p class="subtitle">{{ agendamento.cliente.nome }} · {{ agendamento.data|date:'d/m/Y' }} às {{ agendamento.horario|time:'H:i' }}</p><form method="post" class="panel editor-form">{% csrf_token %}{% if acao == 'cancelar' %}<p class="section-description">O cancelamento preserva o histórico e libera o horário para uma nova reserva, se ele ainda estiver disponível. O registro da sessão será mantido para consulta.</p>{% elif acao == 'concluir' %}<p class="section-description">Dar baixa marca este atendimento como concluído. O histórico e o plano alimentar ficam disponíveis no cadastro do paciente.</p>{% else %}<p class="section-description">A consulta passará de pendente para confirmada.</p>{% endif %}{% include 'agenda/campos.html' %}<div class="clinical-actions"><button class="primary-button{% if acao == 'cancelar' %} danger-button{% endif %}" type="submit">{% if acao == 'cancelar' %}Confirmar cancelamento{% else %}{{ titulo }}{% endif %}</button><a class="text-button" href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">Voltar</a></div></form></main>
+  <main id="conteudo" class="main-content narrow-content">
+    <a class="back-link"
+       href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">← Atendimento</a>
+    <p class="eyebrow">CONTROLE DE CONSULTAS</p>
+    <h1>{{ titulo }}<span class="heading-dot">.</span></h1>
+    <p class="subtitle">{{ agendamento.cliente.nome }} · {{ agendamento.data|date:'d/m/Y' }} às {{ agendamento.horario|time:'H:i' }}</p>
+    <form method="post" class="panel editor-form">
+      {% csrf_token %}
+      {% if acao == "cancelar" %}
+        <p class="section-description">O cancelamento preserva o histórico e libera o horário para uma nova reserva, se ele ainda estiver disponível. O registro da sessão será mantido para consulta.</p>
+      {% elif acao == "concluir" %}
+        <p class="section-description">Dar baixa marca este atendimento como concluído. O histórico e o plano alimentar ficam disponíveis no cadastro do paciente.</p>
+      {% else %}
+        <p class="section-description">A consulta passará de pendente para confirmada.</p>
+      {% endif %}
+      {% include "agenda/campos.html" %}
+      <div class="clinical-actions">
+        <button class="primary-button{% if acao == 'cancelar' %} danger-button{% endif %}"
+                type="submit">{% if acao == "cancelar" %}Confirmar cancelamento{% else %}{{ titulo }}{% endif %}</button><a class="text-button"
+   href="{% url 'agenda:detalhes_agendamento' agendamento.pk %}">Voltar</a>
+      </div>
+    </form>
+  </main>
 {% endblock %}

@@ -1,1 +1,52 @@
-<section class="panel"><dl class="patient-details"><dt>Nutricionista</dt><dd>{{ agendamento.profissional.nome|default:'Não informado' }}</dd>{% if agendamento.ficha.respostas %}{% for item in agendamento.ficha.respostas %}<dt>{{ item.pergunta }}</dt><dd>{{ item.resposta|linebreaksbr }}</dd>{% endfor %}{% elif agendamento.ficha %}<dt>Idade</dt><dd>{{ agendamento.ficha.idade }} anos</dd><dt>Contato</dt><dd>{{ agendamento.ficha.contato }}</dd><dt>Tem problemas de saúde?</dt><dd>{{ agendamento.ficha.tem_problemas_saude|yesno:'Sim,Não' }}{% if agendamento.ficha.problemas_saude %}<p>{{ agendamento.ficha.problemas_saude|linebreaksbr }}</p>{% endif %}</dd><dt>Usa medicações?</dt><dd>{{ agendamento.ficha.usa_medicacoes|yesno:'Sim,Não' }}{% if agendamento.ficha.medicacoes %}<p>{{ agendamento.ficha.medicacoes|linebreaksbr }}</p>{% endif %}</dd><dt>Última vez que fez exames</dt><dd>{{ agendamento.ficha.ultimos_exames|default:'Não informado' }}</dd><dt>Motivo da consulta</dt><dd>{{ agendamento.ficha.motivo_consulta|linebreaksbr }}</dd><dt>Observações</dt><dd>{{ agendamento.ficha.observacoes|default:'Nenhuma observação'|linebreaksbr }}</dd>{% else %}<dt>Ficha do paciente</dt><dd>Este agendamento foi cadastrado sem o formulário do paciente.</dd>{% endif %}</dl></section>
+<section class="panel">
+  <dl class="patient-details">
+    <dt>Nutricionista</dt>
+    <dd>
+      {{ agendamento.profissional.nome|default:'Não informado' }}
+    </dd>
+    {% if agendamento.ficha.respostas %}
+      {% for item in agendamento.ficha.respostas %}
+        <dt>{{ item.pergunta }}</dt>
+        <dd>
+          {{ item.resposta|linebreaksbr }}
+        </dd>
+      {% endfor %}
+    {% elif agendamento.ficha %}
+      <dt>Idade</dt>
+      <dd>
+        {{ agendamento.ficha.idade }} anos
+      </dd>
+      <dt>Contato</dt>
+      <dd>
+        {{ agendamento.ficha.contato }}
+      </dd>
+      <dt>Tem problemas de saúde?</dt>
+      <dd>{{ agendamento.ficha.tem_problemas_saude|yesno:'Sim,Não' }}{% if agendamento.ficha.problemas_saude %}
+        <p>{{ agendamento.ficha.problemas_saude|linebreaksbr }}</p>
+    {% endif %}
+  </dd>
+  <dt>Usa medicações?</dt>
+  <dd>{{ agendamento.ficha.usa_medicacoes|yesno:'Sim,Não' }}{% if agendamento.ficha.medicacoes %}
+    <p>{{ agendamento.ficha.medicacoes|linebreaksbr }}</p>
+  {% endif %}
+</dd>
+<dt>Última vez que fez exames</dt>
+<dd>
+  {{ agendamento.ficha.ultimos_exames|default:'Não informado' }}
+</dd>
+<dt>Motivo da consulta</dt>
+<dd>
+  {{ agendamento.ficha.motivo_consulta|linebreaksbr }}
+</dd>
+<dt>Observações</dt>
+<dd>
+  {{ agendamento.ficha.observacoes|default:'Nenhuma observação'|linebreaksbr }}
+</dd>
+{% else %}
+<dt>Ficha do paciente</dt>
+<dd>
+  Este agendamento foi cadastrado sem o formulário do paciente.
+</dd>
+{% endif %}
+</dl>
+</section>

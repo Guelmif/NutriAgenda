@@ -1,3 +1,12 @@
-{% if form.non_field_errors %}<div class="error-message" role="alert">{{ form.non_field_errors }}</div>{% endif %}
-{% for field in form.hidden_fields %}{{ field }}{% if field.errors %}<div class="error-message" role="alert">{{ field.errors }}</div>{% endif %}{% endfor %}
-{% for field in form.visible_fields %}{% include 'agenda/campo.html' with field=field %}{% endfor %}
+{% if form.non_field_errors %}
+  <div class="error-message" role="alert">{{ form.non_field_errors }}</div>
+{% endif %}
+{% for field in form.hidden_fields %}
+  {{ field }}
+  {% if field.errors %}
+    <div class="error-message" role="alert">{{ field.errors }}</div>
+  {% endif %}
+{% endfor %}
+{% for field in form.visible_fields %}
+  {% include "agenda/campo.html" with field=field %}
+{% endfor %}

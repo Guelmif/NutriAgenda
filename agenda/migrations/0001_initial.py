@@ -15,34 +15,92 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Cliente',
+            name="Cliente",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nome', models.CharField(max_length=150, verbose_name='nome')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='e-mail')),
-                ('telefone', models.CharField(blank=True, max_length=25, verbose_name='telefone')),
-                ('nutricionista', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clientes', to=settings.AUTH_USER_MODEL, verbose_name='nutricionista')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("nome", models.CharField(max_length=150, verbose_name="nome")),
+                (
+                    "email",
+                    models.EmailField(
+                        blank=True, max_length=254, verbose_name="e-mail"
+                    ),
+                ),
+                (
+                    "telefone",
+                    models.CharField(
+                        blank=True, max_length=25, verbose_name="telefone"
+                    ),
+                ),
+                (
+                    "nutricionista",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="clientes",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="nutricionista",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'cliente',
-                'verbose_name_plural': 'clientes',
-                'ordering': ['nome', 'pk'],
+                "verbose_name": "cliente",
+                "verbose_name_plural": "clientes",
+                "ordering": ["nome", "pk"],
             },
         ),
         migrations.CreateModel(
-            name='Agendamento',
+            name="Agendamento",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data', models.DateField(verbose_name='data')),
-                ('horario', models.TimeField(verbose_name='horário')),
-                ('status', models.CharField(choices=[('confirmado', 'Confirmado'), ('pendente', 'Pendente'), ('cancelado', 'Cancelado')], default='confirmado', max_length=12, verbose_name='status')),
-                ('cliente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='agenda.cliente', verbose_name='cliente')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("data", models.DateField(verbose_name="data")),
+                ("horario", models.TimeField(verbose_name="horário")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("confirmado", "Confirmado"),
+                            ("pendente", "Pendente"),
+                            ("cancelado", "Cancelado"),
+                        ],
+                        default="confirmado",
+                        max_length=12,
+                        verbose_name="status",
+                    ),
+                ),
+                (
+                    "cliente",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="agendamentos",
+                        to="agenda.cliente",
+                        verbose_name="cliente",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'agendamento',
-                'verbose_name_plural': 'agendamentos',
-                'ordering': ['data', 'horario', 'pk'],
-                'indexes': [models.Index(fields=['data', 'horario'], name='agenda_agen_data_bc3560_idx')],
+                "verbose_name": "agendamento",
+                "verbose_name_plural": "agendamentos",
+                "ordering": ["data", "horario", "pk"],
+                "indexes": [
+                    models.Index(
+                        fields=["data", "horario"], name="agenda_agen_data_bc3560_idx"
+                    )
+                ],
             },
         ),
     ]

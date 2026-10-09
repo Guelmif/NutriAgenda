@@ -8,28 +8,55 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0004_agendamento_cancelado_em_agendamento_concluido_em_and_more'),
+        ("agenda", "0004_agendamento_cancelado_em_agendamento_concluido_em_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='RevisaoSessao',
+            name="RevisaoSessao",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('versao', models.PositiveIntegerField()),
-                ('observacoes', models.TextField(blank=True, max_length=10000)),
-                ('plano_alimentar', models.TextField(blank=True, max_length=10000)),
-                ('orientacoes', models.TextField(blank=True, max_length=10000)),
-                ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('autor', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='revisoes_sessoes', to=settings.AUTH_USER_MODEL)),
-                ('sessao', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='revisoes', to='agenda.registrosessao')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("versao", models.PositiveIntegerField()),
+                ("observacoes", models.TextField(blank=True, max_length=10000)),
+                ("plano_alimentar", models.TextField(blank=True, max_length=10000)),
+                ("orientacoes", models.TextField(blank=True, max_length=10000)),
+                ("criado_em", models.DateTimeField(auto_now_add=True)),
+                (
+                    "autor",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="revisoes_sessoes",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "sessao",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="revisoes",
+                        to="agenda.registrosessao",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'versão do registro da sessão',
-                'verbose_name_plural': 'versões dos registros das sessões',
-                'ordering': ['-versao'],
-                'constraints': [models.UniqueConstraint(fields=('sessao', 'versao'), name='unique_session_revision')],
+                "verbose_name": "versão do registro da sessão",
+                "verbose_name_plural": "versões dos registros das sessões",
+                "ordering": ["-versao"],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("sessao", "versao"), name="unique_session_revision"
+                    )
+                ],
             },
         ),
     ]
