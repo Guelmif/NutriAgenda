@@ -105,10 +105,22 @@ abbr[title] {
   letter-spacing: -0.8px;
   color: var(--green);
 }
+/* Aplica o negrito correto e a cor verde escura apenas no Unopar */
+.brand .brand-bold {
+  font-weight: 700 !important; /* Peso bem marcado para o negrito */
+  color: #166b50 !important;   /* Cor verde oficial do seu tema */
+}
+
+.brand-light {
+  font-weight: 400 !important;
+}
 .brand-name {
   font-weight: 750;
 }
 .brand-icon {
+  .brand-bold {
+  font-weight: 700 !important;
+}
   display: grid;
   place-items: center;
   width: 38px;
