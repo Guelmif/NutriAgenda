@@ -1,7 +1,7 @@
 .back-link {
   display: inline-block;
   color: var(--green);
-  font-size: 12px;
+  font-size: 18px;
   margin-bottom: 24px;
 }
 .narrow-content {
@@ -488,7 +488,7 @@ details summary {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 24px;
-  font-size: 12px;
+  font-size: 19px;
   font-weight: 600;
   color: var(--green);
 }
