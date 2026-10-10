@@ -310,3 +310,45 @@ As variáveis são lidas do ambiente do sistema; o projeto não carrega arquivos
 | `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1,[::1]` | Hosts separados por vírgula |
 
 O servidor `runserver` é para desenvolvimento. Para publicar, configure HTTPS, servidor WSGI/ASGI e serviço de arquivos estáticos após `python manage.py collectstatic`. Com `DJANGO_DEBUG=false`, os cookies de sessão e CSRF exigem HTTPS. O código publicado no GitHub não inclui banco de dados, senhas, respostas de pacientes ou chaves locais.
+
+## Aplicativo no celular (PWA)
+
+A ClínicaUnopar pode ser instalada na tela inicial do aparelho. O app abre em uma janela própria, com o mesmo login, calendário, atendimentos e pacientes da versão web. A interface se adapta a telas pequenas e respeita as áreas da câmera e dos controles do aparelho.
+
+- **Android e navegadores compatíveis:** ao abrir a clínica ou a tela de login, o convite **Instalar ClínicaUnopar** aparece quando o navegador libera a instalação. Toque em **Instalar** e confirme na janela do navegador.
+- **iPhone e iPad:** o convite abre instruções para usar **Compartilhar → Adicionar à Tela de Início** no Safari. Se aparecer **Abrir como App**, mantenha essa opção ativada e toque em **Adicionar**.
+- **Agora não:** oculta o convite por sete dias nesse navegador. O botão **Instalar app no aparelho** continua acessível. No modo instalado, os convites ficam ocultos.
+- A disponibilidade do convite depende do navegador. Também é possível usar a opção de instalação disponível no menu dele.
+
+**A instalação exige HTTPS**, exceto nos testes locais em `localhost` ou `127.0.0.1`. O acesso por IP público usando `http://` permite testar a agenda no celular, mas não habilita esta instalação. Para a VPS, configure um domínio e um certificado HTTPS e ajuste os hosts, origens CSRF e cookies seguros.
+
+O aplicativo precisa de internet para carregar a agenda, consultar pacientes e registrar alterações. O service worker guarda somente uma tela genérica de falta de conexão e ícones públicos. Ele não guarda prontuários, agendamentos, páginas autenticadas ou respostas de formulários, nem agenda envios para depois. O login e as permissões do Django continuam sendo exigidos.
+
+Os endpoints públicos `/manifest.webmanifest` e `/service-worker.js` são servidos pelo Django. Os ícones e a tela de falta de conexão ficam em `agenda/static/agenda/pwa/`. Não é preciso executar novas migrações para esta funcionalidade.
+
+Para atualizar uma instalação existente, traga a branch `chore/clinica-unopar-formatacao`, execute `python manage.py collectstatic --noinput` no ambiente de produção e reinicie o serviço Django/Gunicorn. O service worker atualiza os arquivos públicos quando sua versão muda; nenhum banco de dados é incluído nessa atualização.
+
+Na VPS configurada em `/srv/clinicaunopar`, usando o serviço e usuário `clinicaunopar`, execute:
+
+```bash
+cd /srv/clinicaunopar
+git pull --ff-only origin chore/clinica-unopar-formatacao
+sudo -u clinicaunopar bash <<'SHELL'
+set -e
+cd /srv/clinicaunopar
+set -a
+source /etc/clinicaunopar/app.env
+set +a
+.venv/bin/python manage.py collectstatic --noinput
+SHELL
+sudo systemctl restart clinicaunopar
+```
+
+O convite e as instruções podem ser vistos em [Android](docs/instalacao-mobile.png) e [iPhone](docs/instalacao-iphone.png). A [tela de falta de conexão](docs/app-sem-conexao.png) não contém dados de pacientes.
+
+Os testes de instalação e de isolamento do cache ficam em `agenda/test_pwa.py` e `tests/pwa-worker.test.cjs`:
+
+```bash
+python manage.py test
+node --test tests/pwa-worker.test.cjs
+```

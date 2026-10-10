@@ -4,24 +4,37 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#166b50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ClínicaUnopar">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>{% block title %}ClínicaUnopar{% endblock %}</title>
     <link rel="icon"
           href="{% static 'agenda/favicon.svg' %}"
           type="image/svg+xml">
     <link rel="stylesheet" href="{% static 'agenda/agenda.css' %}">
     <link rel="stylesheet" href="{% static 'agenda/formularios.css' %}">
+    <link rel="stylesheet" href="{% static 'agenda/pwa/pwa.css' %}">
+    <link rel="manifest" href="{% url 'agenda:manifest' %}">
+    <link rel="apple-touch-icon"
+          href="{% static 'agenda/pwa/apple-touch-icon.png' %}">
+    <script src="{% static 'agenda/pwa/pwa.js' %}"
+            data-worker="{% url 'agenda:service_worker' %}"
+            defer></script>
     {% block scripts %}{% endblock %}
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <header class="site-header">
       <div class="header-inner">
-          <a class="brand" href="{% url 'agenda:calendario' %}" aria-label="ClínicaUnopar, página inicial">
-            <span class="brand-icon" aria-hidden="true">{% include "agenda/leaf.svg" %}</span>
-            <span class="brand-light">Clínica</span><span class="brand-bold">Unopar</span>
-          </a>
+        <a class="brand"
+           href="{% url 'agenda:calendario' %}"
+           aria-label="ClínicaUnopar, página inicial">
+          <span class="brand-icon" aria-hidden="true">{% include "agenda/leaf.svg" %}</span>
+          <span class="brand-light">Clínica</span><span class="brand-bold">Unopar</span>
+        </a>
         {% if user.is_authenticated %}
           <div class="account">
             <span class="account-name">{{ user.get_full_name|default:user.username }}</span>
@@ -48,6 +61,9 @@
           <p class="flash-message">{{ message }}</p>
         {% endfor %}
       </div>
+    {% endif %}
+    {% if user.is_authenticated or request.resolver_match.url_name == "login" %}
+      {% include "agenda/instalacao.html" %}
     {% endif %}
     {% block content %}{% endblock %}
   </body>

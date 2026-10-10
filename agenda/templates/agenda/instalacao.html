@@ -1,0 +1,46 @@
+{% load static %}
+
+<aside class="install-banner"
+       id="install-banner"
+       aria-labelledby="install-title"
+       hidden>
+  <img src="{% static 'agenda/pwa/icon-192.png' %}"
+       width="48"
+       height="48"
+       alt="">
+  <div class="install-copy">
+    <h2 id="install-title">Instalar ClínicaUnopar</h2>
+    <p>Sua agenda na tela inicial, com acesso direto à clínica.</p>
+    <p id="install-feedback" role="status" hidden></p>
+  </div>
+  <div class="install-actions">
+    <button type="button" class="primary-button" id="install-confirm">Instalar</button>
+    <button type="button" class="text-button" id="install-dismiss">Agora não</button>
+  </div>
+</aside>
+<div class="install-entry" id="install-entry" hidden>
+  <button type="button" class="text-button" id="install-open">Instalar app no aparelho</button>
+</div>
+<dialog class="install-dialog"
+        id="install-dialog"
+        aria-labelledby="install-help-title">
+  <div class="install-dialog-heading">
+    <img src="{% static 'agenda/pwa/icon-192.png' %}"
+         width="48"
+         height="48"
+         alt="">
+    <button type="button"
+            class="icon-button"
+            id="install-close"
+            aria-label="Fechar instruções">×</button>
+  </div>
+  <h2 id="install-help-title">ClínicaUnopar no seu iPhone ou iPad</h2>
+  <p>Abra este site no Safari e siga estes passos:</p>
+  <ol>
+    <li>Toque no menu de <strong>Compartilhar</strong>. Se necessário, abra o menu do navegador primeiro.</li>
+    <li>Escolha <strong>Adicionar à Tela de Início</strong>.</li>
+    <li>Se aparecer a opção <strong>Abrir como App</strong>, deixe-a ativada. Toque em <strong>Adicionar</strong>.</li>
+  </ol>
+  <p>Depois, abra o ícone da ClínicaUnopar na tela inicial. Entre com seu usuário e senha quando solicitado.</p>
+  <button type="button" class="primary-button" id="install-done">Entendi</button>
+</dialog>

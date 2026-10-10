@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#166b50" />
+    <title>Sem conexão · ClínicaUnopar</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: max(24px, env(safe-area-inset-top))
+          max(24px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom))
+          max(24px, env(safe-area-inset-left));
+        background: #f6f8f5;
+        color: #243e34;
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 420px;
+        text-align: center;
+      }
+      svg {
+        width: 64px;
+        height: 64px;
+      }
+      .brand {
+        color: #166b50;
+        font-weight: 650;
+      }
+      h1 {
+        font-size: 28px;
+        line-height: 1.3;
+        margin: 24px 0 12px;
+      }
+      button {
+        font: inherit;
+        margin-top: 16px;
+        padding: 12px 24px;
+        border: 0;
+        border-radius: 10px;
+        color: white;
+        background: #166b50;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 3px solid #d19732;
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+      >
+        <rect width="32" height="32" rx="9" fill="#166b50" />
+        <path
+          d="M25 7C12 5 6 12 10 20c4 7 15 1 15-13ZM7 26l12-14"
+          fill="none"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <p class="brand">ClínicaUnopar</p>
+      <h1>Você está sem conexão</h1>
+      <p>
+        Conecte-se à internet para acessar a agenda, consultar pacientes e
+        salvar alterações.
+      </p>
+      <button type="button" onclick="location.reload()">
+        Tentar novamente
+      </button>
+    </main>
+  </body>
+</html>

@@ -1,8 +1,10 @@
 from django.urls import path
-from . import atendimento_views, formulario_views, views
+from . import atendimento_views, formulario_views, pwa_views, views
 
 app_name = "agenda"
 urlpatterns = [
+    path("manifest.webmanifest", pwa_views.manifest, name="manifest"),
+    path("service-worker.js", pwa_views.service_worker, name="service_worker"),
     path("", views.calendario, name="calendario"),
     path("api/agendamentos/", views.agendamentos_do_dia, name="agendamentos_do_dia"),
     path("formularios/", formulario_views.formularios, name="formularios"),
