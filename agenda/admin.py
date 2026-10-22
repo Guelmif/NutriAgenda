@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin
 from django.db.models import F
 from .models import (
     Agendamento,
     Cliente,
+    ControleSenha,
     Disponibilidade,
     FichaPaciente,
     FormularioAgendamento,
@@ -11,6 +14,42 @@ from .models import (
     RegistroSessao,
     AlteracaoStatus,
 )
+
+
+class UsuarioAdmin(UserAdmin):
+    list_display = (*UserAdmin.list_display, "troca_senha_pendente")
+    actions = ["exigir_troca_senha"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("controle_senha")
+
+    @admin.display(boolean=True, description="Troca de senha pendente")
+    def troca_senha_pendente(self, obj):
+        try:
+            return obj.controle_senha.troca_obrigatoria
+        except ControleSenha.DoesNotExist:
+            return False
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:
+            ControleSenha.objects.create(usuario=obj, troca_obrigatoria=True)
+
+    @admin.action(
+        description="Exigir troca de senha no próximo acesso", permissions=["change"]
+    )
+    def exigir_troca_senha(self, request, queryset):
+        for user in queryset:
+            ControleSenha.objects.update_or_create(
+                usuario=user, defaults={"troca_obrigatoria": True}
+            )
+        self.message_user(
+            request, "Troca de senha exigida para os usuários selecionados."
+        )
+
+
+admin.site.unregister(get_user_model())
+admin.site.register(get_user_model(), UsuarioAdmin)
 
 
 @admin.register(Cliente)

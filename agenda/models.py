@@ -7,6 +7,25 @@ from django.db import models
 from django.utils import timezone
 
 
+class ControleSenha(models.Model):
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="controle_senha",
+    )
+    troca_obrigatoria = models.BooleanField("exigir troca de senha", default=True)
+    alterada_em = models.DateTimeField(
+        "última troca pelo usuário", null=True, blank=True
+    )
+
+    class Meta:
+        verbose_name = "controle de senha"
+        verbose_name_plural = "controles de senha"
+
+    def __str__(self):
+        return str(self.usuario)
+
+
 class Profissional(models.Model):
     responsavel = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profissionais"

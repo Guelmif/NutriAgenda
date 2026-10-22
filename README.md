@@ -339,6 +339,7 @@ cd /srv/clinicaunopar
 set -a
 source /etc/clinicaunopar/app.env
 set +a
+.venv/bin/python manage.py migrate --noinput
 .venv/bin/python manage.py collectstatic --noinput
 SHELL
 sudo systemctl restart clinicaunopar
@@ -352,3 +353,32 @@ Os testes de instalação e de isolamento do cache ficam em `agenda/test_pwa.py`
 python manage.py test
 node --test tests/pwa-worker.test.cjs
 ```
+
+## Troca de senha no primeiro acesso
+
+Usuários novos cadastrados em **Admin → Usuários → Adicionar usuário** recebem uma exigência de troca de senha. O administrador define uma senha provisória e a entrega ao usuário. Ao entrar pelo site ou pelo Admin, o usuário é direcionado à página **Defina sua nova senha** antes de acessar a clínica.
+
+É necessário informar a senha atual e confirmar uma senha nova, diferente da provisória e aprovada pelos validadores do Django. A troca mantém a sessão atual autenticada e invalida as outras sessões desse usuário. Se houver erro de validação, a exigência continua ativa. Páginas privadas, APIs e operações de escrita ficam bloqueadas pelo servidor enquanto a troca está pendente. Os formulários públicos de pacientes continuam disponíveis.
+
+As contas que já existiam antes dessa atualização e as criadas por `createsuperuser`, scripts ou outros canais mantêm seu comportamento anterior. Para exigir a troca de uma conta existente, selecione-a em **Admin → Usuários** e execute a ação **Exigir troca de senha no próximo acesso**. A coluna **Troca de senha pendente** mostra quais usuários ainda precisam concluir o processo; a exigência também vale para sessões já abertas. Essa ação não muda a senha atual do usuário.
+
+Depois da primeira troca, o usuário acessa a clínica normalmente nos próximos logins e pode trocar sua senha novamente em **Minha senha**. Uma nova exigência só será aplicada se o administrador executar a ação acima. O controle usa a tabela `agenda_controlesenha`, vinculada ao usuário padrão do Django, sem substituir a tabela de usuários existente.
+
+**Esta atualização exige a migração `0006_controlesenha`.** Na VPS, execute a migração usando as configurações de produção antes de reiniciar o serviço:
+
+```bash
+cd /srv/clinicaunopar
+git pull --ff-only origin chore/clinica-unopar-formatacao
+sudo -u clinicaunopar bash <<'SHELL'
+set -e
+cd /srv/clinicaunopar
+set -a
+source /etc/clinicaunopar/app.env
+set +a
+.venv/bin/python manage.py migrate --noinput
+.venv/bin/python manage.py collectstatic --noinput
+SHELL
+sudo systemctl restart clinicaunopar
+```
+
+Os testes de primeiro acesso, bloqueio de rotas, validação, CSRF, sessão e integração com o Admin ficam em `agenda/test_conta.py` e são executados por `python manage.py test`.

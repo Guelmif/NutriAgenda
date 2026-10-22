@@ -46,13 +46,14 @@
         {% endif %}
       </div>
     </header>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not request.troca_senha_obrigatoria %}
       <nav class="workspace-nav" aria-label="Consultório">
         <a href="{% url 'agenda:calendario' %}">Agenda</a>
         <a href="{% url 'agenda:atendimentos' %}">Atendimentos</a>
         <a href="{% url 'agenda:clientes' %}">Pacientes</a>
         <a href="{% url 'agenda:formularios' %}">Formulários</a>
         <a href="{% url 'agenda:equipe' %}">Equipe</a>
+        <a href="{% url 'password_change' %}">Minha senha</a>
       </nav>
     {% endif %}
     {% if messages %}
@@ -62,8 +63,10 @@
         {% endfor %}
       </div>
     {% endif %}
-    {% if user.is_authenticated or request.resolver_match.url_name == "login" %}
-      {% include "agenda/instalacao.html" %}
+    {% if not request.troca_senha_obrigatoria %}
+      {% if user.is_authenticated or request.resolver_match.url_name == "login" %}
+        {% include "agenda/instalacao.html" %}
+      {% endif %}
     {% endif %}
     {% block content %}{% endblock %}
   </body>

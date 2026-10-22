@@ -1,0 +1,45 @@
+.password-main {
+  min-height: 0;
+  padding-top: 40px;
+  padding-bottom: max(40px, env(safe-area-inset-bottom));
+}
+.password-field label {
+  display: block;
+  margin-bottom: 6px;
+}
+.password-help,
+.password-error {
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.password-help {
+  color: #52685c;
+  margin-top: 8px;
+}
+.password-help ul {
+  padding-left: 18px;
+  margin: 0;
+}
+.password-error {
+  color: #9e4545;
+}
+.password-error p {
+  margin-top: 6px;
+}
+.password-back {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+}
+@media (max-width: 420px) {
+  .password-main {
+    padding: 24px 16px;
+  }
+  .password-main .login-card {
+    padding: 24px;
+  }
+  .password-main h1 {
+    font-size: 28px;
+  }
+}

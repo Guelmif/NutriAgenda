@@ -1,0 +1,53 @@
+{% extends "agenda/base.html" %}
+
+{% load static %}
+
+{% block title %}Alterar senha · ClínicaUnopar{% endblock %}
+{% block scripts %}
+  <link rel="stylesheet" href="{% static 'agenda/conta.css' %}">
+{% endblock %}
+{% block content %}
+  <main id="conteudo" class="login-main password-main">
+    <section class="login-card" aria-labelledby="password-title">
+      <p class="eyebrow">SEGURANÇA DA CONTA</p>
+      <h1 id="password-title">Defina sua nova senha<span class="heading-dot">.</span></h1>
+      {% if request.troca_senha_obrigatoria %}
+        <p class="subtitle">Antes de acessar a clínica, você precisa trocar a senha fornecida pelo administrador.</p>
+      {% else %}
+        <p class="subtitle">Escolha uma nova senha para proteger seu acesso à clínica.</p>
+      {% endif %}
+      <form method="post" class="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% if form.errors %}
+          <div class="error-message"
+               role="alert">Confira os campos abaixo. A senha ainda não foi alterada.</div>
+        {% endif %}
+        {% for error in form.non_field_errors %}<p class="password-error">{{ error }}</p>{% endfor %}
+        {% for field in form %}
+          <div class="password-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <input type="password"
+                   name="{{ field.html_name }}"
+                   id="{{ field.id_for_label }}"
+                   autocomplete="{% if field.name == 'old_password' %}current-password{% else %}new-password{% endif %}"
+                   {% if field.name == 'old_password' %}autofocus{% endif %}
+                   {% if field.errors %}aria-invalid="true"{% endif %}
+                   aria-describedby="{{ field.id_for_label }}_help {{ field.id_for_label }}_errors"
+                   required>
+            <div class="password-help"
+                 id="{{ field.id_for_label }}_help">{{ field.help_text|safe }}</div>
+            <div class="password-error" id="{{ field.id_for_label }}_errors">
+              {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+        <button class="primary-button" type="submit">Salvar nova senha</button>
+      </form>
+      {% if not request.troca_senha_obrigatoria %}
+        <a class="text-button password-back"
+           href="{% url 'agenda:calendario' %}">Voltar para a agenda</a>
+      {% endif %}
+    </section>
+  </main>
+{% endblock %}

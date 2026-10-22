@@ -19,6 +19,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
+from agenda.conta_views import AlterarSenhaView, EntrarView
+
 admin.site.site_header = "ClínicaUnopar — Administração"
 admin.site.site_title = "ClínicaUnopar"
 admin.site.index_title = "Clientes e agendamentos"
@@ -27,11 +29,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path(
         "entrar/",
-        auth_views.LoginView.as_view(
-            template_name="agenda/login.html", redirect_authenticated_user=True
-        ),
+        EntrarView.as_view(),
         name="login",
     ),
+    path("conta/alterar-senha/", AlterarSenhaView.as_view(), name="password_change"),
     path("sair/", auth_views.LogoutView.as_view(), name="logout"),
     path("", include("agenda.urls")),
 ]
