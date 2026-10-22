@@ -382,3 +382,15 @@ sudo systemctl restart clinicaunopar
 ```
 
 Os testes de primeiro acesso, bloqueio de rotas, validação, CSRF, sessão e integração com o Admin ficam em `agenda/test_conta.py` e são executados por `python manage.py test`.
+
+## Encerramento de formulários
+
+Em **Formulários**, escolha **Encerrar formulário** no cartão do formulário ou na tela de configuração. A confirmação informa o efeito antes de aplicar a alteração. Só o responsável pelo formulário pode encerrá-lo ou reabri-lo.
+
+Após confirmar, o formulário aparece como **Encerrado**. O link público exibe uma mensagem de indisponibilidade com status HTTP 404, a consulta de horários deixa de retornar opções e novos envios são rejeitados, inclusive de páginas abertas antes do encerramento. Os agendamentos já recebidos, pacientes, fichas, perguntas e modelos salvos são preservados. O encerramento não cancela consultas.
+
+Para voltar a disponibilizar o mesmo link, use **Reabrir formulário** e confirme. Apenas horários futuros, ativos e livres voltam a ser oferecidos. A situação é controlada pelas ações de encerramento e reabertura; salvar uma edição antiga do título ou da descrição não reabre o formulário.
+
+Esta funcionalidade reutiliza o campo `ativo` e não exige uma migração adicional. Formulários anteriormente pausados passam a aparecer como encerrados e podem ser reabertos pela mesma ação. A criação de novos formulários mantém a opção de disponibilizá-los imediatamente ou deixá-los indisponíveis.
+
+Para publicar na VPS, use o procedimento de atualização acima, incluindo `migrate`, `collectstatic` e reinício do serviço, para manter todas as funcionalidades da branch atualizadas. Os testes de encerramento, reabertura, permissões, CSRF e envios anteriores ao encerramento estão em `agenda/test_formularios.py`.

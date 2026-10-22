@@ -21,24 +21,34 @@
     </section>
     <section class="share-panel panel">
       <div>
-        <span class="small-badge {% if not formulario.ativo %}muted-badge{% endif %}">{% if formulario.ativo %}Formulário ativo{% else %}Formulário pausado{% endif %}</span>
-        <h2>Compartilhe com os pacientes</h2>
-        <p class="subtitle">Somente os horários futuros e livres aparecem no formulário.</p>
+        <span class="small-badge {% if not formulario.ativo %}muted-badge{% endif %}">{% if formulario.ativo %}Formulário ativo{% else %}Formulário encerrado{% endif %}</span>
+        {% if formulario.ativo %}
+          <h2>Compartilhe com os pacientes</h2>
+          <p class="subtitle">Somente os horários futuros e livres aparecem no formulário.</p>
+        {% else %}
+          <h2>O link público está indisponível</h2>
+          <p class="subtitle">Novos agendamentos estão bloqueados. As consultas já registradas continuam na agenda.</p>
+        {% endif %}
       </div>
       <div class="share-controls">
-        <label class="sr-only" for="share-link">Link do formulário</label>
-        <input id="share-link"
-               value="{{ link_publico }}"
-               readonly><button id="copy-link"
+        {% if formulario.ativo %}
+          <label class="sr-only" for="share-link">Link do formulário</label>
+          <input id="share-link"
+                 value="{{ link_publico }}"
+                 readonly><button id="copy-link"
         class="today-button"
         type="button">Copiar link</button>
-        {% if formulario.ativo %}
           <a class="today-button"
              href="{% url 'agenda:formulario_publico' formulario.token %}"
              target="_blank"
              rel="noopener">Abrir formulário ↗</a>
+          <p id="copy-feedback" class="field-help" aria-live="polite"></p>
+          <a class="today-button danger-button"
+             href="{% url 'agenda:situacao_formulario' formulario.token 'encerrar' %}">Encerrar formulário</a>
+        {% else %}
+          <a class="today-button"
+             href="{% url 'agenda:situacao_formulario' formulario.token 'reabrir' %}">Reabrir formulário</a>
         {% endif %}
-        <p id="copy-feedback" class="field-help" aria-live="polite"></p>
       </div>
     </section>
     <section class="panel question-summary">

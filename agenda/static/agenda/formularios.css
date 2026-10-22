@@ -241,6 +241,12 @@ details summary {
 .form-list-item .today-button {
   flex-shrink: 0;
 }
+.form-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
 .booking-main {
   max-width: 870px;
   margin: auto;

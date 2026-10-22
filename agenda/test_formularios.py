@@ -456,6 +456,196 @@ class FormulariosTests(TestCase):
                 list(admin.site._registry[model].get_queryset(request)), expected
             )
 
+    def test_close_requires_login_ownership_confirmation_and_csrf(self):
+        for action in ("encerrar", "reabrir"):
+            url = reverse(
+                "agenda:situacao_formulario", args=[self.formulario.token, action]
+            )
+            self.assertEqual(self.client.get(url).status_code, 302)
+            self.client.force_login(self.other)
+            self.assertEqual(self.client.get(url).status_code, 404)
+            self.assertEqual(self.client.post(url).status_code, 404)
+            self.client.force_login(self.owner)
+            self.assertEqual(self.client.get(url).status_code, 200)
+            self.formulario.refresh_from_db()
+            self.assertTrue(self.formulario.ativo)
+            strict = Client(enforce_csrf_checks=True)
+            strict.force_login(self.owner)
+            self.assertEqual(strict.post(url).status_code, 403)
+            self.assertEqual(self.client.put(url).status_code, 405)
+            self.client.logout()
+
+    def test_closing_blocks_link_submission_availability_and_success_page(self):
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+        self.client.force_login(self.owner)
+        url = reverse(
+            "agenda:situacao_formulario", args=[self.formulario.token, "encerrar"]
+        )
+        self.assertRedirects(self.client.post(url), reverse("agenda:formularios"))
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Formulário encerrado", status_code=404)
+        self.assertNotContains(response, 'name="nome"', status_code=404)
+        self.assertIn("no-store", response["Cache-Control"])
+        self.assertEqual(self.client.post(self.url, self.payload).status_code, 404)
+        self.assertEqual(
+            self.client.get(
+                reverse(
+                    "agenda:disponibilidades_publicas", args=[self.formulario.token]
+                ),
+                {"profissional": self.prof.pk},
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("agenda:formulario_sucesso", args=[self.formulario.token])
+            ).status_code,
+            404,
+        )
+        self.assertEqual(Agendamento.objects.count(), 0)
+        self.assertEqual(Cliente.objects.count(), 0)
+
+    def test_closing_preserves_existing_patient_booking_and_answers(self):
+        appointment = self.book()
+        answers = appointment.ficha.respostas
+        self.client.force_login(self.owner)
+        self.client.post(
+            reverse(
+                "agenda:situacao_formulario", args=[self.formulario.token, "encerrar"]
+            )
+        )
+        appointment.refresh_from_db()
+        self.assertEqual(appointment.status, "pendente")
+        self.assertEqual(appointment.ficha.respostas, answers)
+        self.assertEqual(Agendamento.objects.count(), 1)
+        self.assertEqual(Cliente.objects.count(), 1)
+        self.assertEqual(FichaPaciente.objects.count(), 1)
+        self.assertEqual(
+            Disponibilidade.objects.filter(formulario=self.formulario).count(), 1
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("agenda:detalhes_agendamento", args=[appointment.pk])
+            ).status_code,
+            200,
+        )
+
+    def test_closing_rejects_previously_validated_patient_form(self):
+        stale = PacienteAgendamentoForm(self.payload, formulario=self.formulario)
+        self.assertTrue(stale.is_valid())
+        self.client.force_login(self.owner)
+        self.client.post(
+            reverse(
+                "agenda:situacao_formulario", args=[self.formulario.token, "encerrar"]
+            )
+        )
+        with self.assertRaises(ValidationError):
+            reservar_consulta(stale)
+        self.assertEqual(Cliente.objects.count(), 0)
+        self.assertEqual(Agendamento.objects.count(), 0)
+
+    def test_closure_during_submission_returns_closed_page_without_booking(self):
+        owner_client = Client()
+        owner_client.force_login(self.owner)
+
+        def close_before_booking(form):
+            owner_client.post(
+                reverse(
+                    "agenda:situacao_formulario",
+                    args=[self.formulario.token, "encerrar"],
+                )
+            )
+            return reservar_consulta(form)
+
+        with patch(
+            "agenda.formulario_views.reservar_consulta",
+            side_effect=close_before_booking,
+        ):
+            response = self.client.post(self.url, self.payload)
+        self.assertContains(response, "Formulário encerrado", status_code=404)
+        self.assertNotContains(response, 'name="nome"', status_code=404)
+        self.assertEqual(Agendamento.objects.count(), 0)
+
+    def test_old_configuration_cannot_reopen_closed_form(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(self.config_url).status_code, 200)
+        self.client.post(
+            reverse(
+                "agenda:situacao_formulario", args=[self.formulario.token, "encerrar"]
+            )
+        )
+        response = self.client.post(
+            self.config_url,
+            {
+                "acao": "config",
+                "config-titulo": "Título atualizado",
+                "config-descricao": "Texto",
+                "config-ativo": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.formulario.refresh_from_db()
+        self.assertFalse(self.formulario.ativo)
+        self.assertEqual(self.formulario.titulo, "Título atualizado")
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_reopening_is_explicit_idempotent_and_keeps_same_link(self):
+        self.client.force_login(self.owner)
+        original_token = self.formulario.token
+        for action in ("encerrar", "encerrar", "reabrir", "reabrir"):
+            self.assertEqual(
+                self.client.post(
+                    reverse("agenda:situacao_formulario", args=[original_token, action])
+                ).status_code,
+                302,
+            )
+            self.formulario.refresh_from_db()
+            self.assertEqual(self.formulario.ativo, action == "reabrir")
+            self.assertEqual(self.formulario.token, original_token)
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+        self.assertEqual(self.client.post(self.url, self.payload).status_code, 302)
+
+    def test_list_and_configuration_offer_clear_status_controls(self):
+        self.client.force_login(self.owner)
+        self.assertContains(
+            self.client.get(reverse("agenda:formularios")), "Encerrar formulário"
+        )
+        self.client.post(
+            reverse(
+                "agenda:situacao_formulario", args=[self.formulario.token, "encerrar"]
+            )
+        )
+        self.assertContains(self.client.get(reverse("agenda:formularios")), "Encerrado")
+        response = self.client.get(self.config_url)
+        self.assertContains(response, "Reabrir formulário")
+        self.assertNotContains(response, "Encerrar formulário")
+        self.assertNotContains(response, 'id="copy-link"')
+        self.assertNotContains(response, 'name="config-ativo"')
+
+    def test_unknown_form_or_action_cannot_change_state(self):
+        import uuid
+
+        self.client.force_login(self.owner)
+        self.assertEqual(
+            self.client.post(
+                reverse("agenda:situacao_formulario", args=[uuid.uuid4(), "encerrar"])
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.post(
+                reverse(
+                    "agenda:situacao_formulario",
+                    args=[self.formulario.token, "invalida"],
+                )
+            ).status_code,
+            400,
+        )
+        self.formulario.refresh_from_db()
+        self.assertTrue(self.formulario.ativo)
+
 
 class ReservaConcorrenteTests(TransactionTestCase):
     def test_two_patients_cannot_reserve_the_same_slot_at_once(self):

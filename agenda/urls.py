@@ -9,6 +9,11 @@ urlpatterns = [
     path("api/agendamentos/", views.agendamentos_do_dia, name="agendamentos_do_dia"),
     path("formularios/", formulario_views.formularios, name="formularios"),
     path(
+        "formularios/<uuid:token>/situacao/<str:acao>/",
+        formulario_views.situacao_formulario,
+        name="situacao_formulario",
+    ),
+    path(
         "formularios/novo/", formulario_views.criar_formulario, name="criar_formulario"
     ),
     path(

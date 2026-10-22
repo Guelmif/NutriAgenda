@@ -21,11 +21,14 @@ from .models import (
 class FormularioConfigForm(forms.ModelForm):
     class Meta:
         model = FormularioAgendamento
-        fields = ["titulo", "descricao", "ativo"]
+        fields = ["titulo", "descricao"]
         widgets = {"descricao": forms.Textarea(attrs={"rows": 3})}
 
 
 class CriarFormularioForm(FormularioConfigForm):
+    class Meta(FormularioConfigForm.Meta):
+        fields = ["titulo", "descricao", "ativo"]
+
     modelo = forms.ModelChoiceField(
         queryset=ModeloFormulario.objects.none(),
         required=False,

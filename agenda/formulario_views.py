@@ -53,6 +53,38 @@ def formularios(request):
 @login_required
 @never_cache
 @require_http_methods(["GET", "POST"])
+def situacao_formulario(request, token, acao):
+    if acao not in {"encerrar", "reabrir"}:
+        return HttpResponseBadRequest("Ação inválida.")
+    item = get_object_or_404(
+        FormularioAgendamento, token=token, responsavel=request.user
+    )
+    if request.method == "POST":
+        # Explicit, idempotent transitions. Updating this row serializes with
+        # reservar_consulta(), which locks the same form before creating a booking.
+        active = acao == "reabrir"
+        FormularioAgendamento.objects.filter(pk=item.pk, ativo=not active).update(
+            ativo=active
+        )
+        messages.success(
+            request,
+            (
+                "Formulário reaberto. O link voltou a aceitar agendamentos."
+                if active
+                else "Formulário encerrado. O link público não aceita mais acessos ou agendamentos."
+            ),
+        )
+        return redirect("agenda:formularios")
+    return render(
+        request,
+        "agenda/situacao_formulario.html",
+        {"formulario": item, "acao": acao},
+    )
+
+
+@login_required
+@never_cache
+@require_http_methods(["GET", "POST"])
 def criar_formulario(request):
     form = CriarFormularioForm(
         request.POST or None,
@@ -98,7 +130,9 @@ def editar_formulario(request, token):
     )
     saved = False
     if action == "config" and config.is_valid():
-        config.save()
+        # A stale presentation edit must never reopen a closed link or overwrite
+        # questionnaire changes saved concurrently from another browser tab.
+        config.save(commit=False).save(update_fields=["titulo", "descricao"])
         messages.success(request, "Configurações atualizadas.")
         saved = True
     elif action == "profissional" and profissional.is_valid():
@@ -245,7 +279,9 @@ def alterar_disponibilidade(request, pk):
 @never_cache
 @require_http_methods(["GET", "POST"])
 def formulario_publico(request, token):
-    item = get_object_or_404(FormularioAgendamento, token=token, ativo=True)
+    item = get_object_or_404(FormularioAgendamento, token=token)
+    if not item.ativo:
+        return render(request, "agenda/formulario_encerrado.html", status=404)
     form = PacienteAgendamentoForm(
         request.POST if request.method == "POST" else None, formulario=item
     )
@@ -267,6 +303,11 @@ def formulario_publico(request, token):
             )
         else:
             return redirect("agenda:formulario_sucesso", token=item.token)
+    if (
+        request.method == "POST"
+        and not FormularioAgendamento.objects.filter(pk=item.pk, ativo=True).exists()
+    ):
+        return render(request, "agenda/formulario_encerrado.html", status=404)
     return render(
         request,
         "agenda/formulario_publico.html",
@@ -281,7 +322,9 @@ def formulario_publico(request, token):
 @never_cache
 @require_GET
 def disponibilidades_publicas(request, token):
-    item = get_object_or_404(FormularioAgendamento, token=token, ativo=True)
+    item = get_object_or_404(FormularioAgendamento, token=token)
+    if not item.ativo:
+        return JsonResponse({"erro": "Formulário encerrado."}, status=404)
     try:
         profissional = int(request.GET.get("profissional", ""))
     except ValueError:
@@ -306,6 +349,8 @@ def disponibilidades_publicas(request, token):
 @require_GET
 def formulario_sucesso(request, token):
     item = get_object_or_404(FormularioAgendamento, token=token)
+    if not item.ativo:
+        return render(request, "agenda/formulario_encerrado.html", status=404)
     return render(request, "agenda/formulario_sucesso.html", {"formulario": item})
 
 
